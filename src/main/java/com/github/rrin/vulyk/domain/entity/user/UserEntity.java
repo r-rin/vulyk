@@ -1,7 +1,6 @@
 package com.github.rrin.vulyk.domain.entity.user;
 
 import com.github.rrin.vulyk.domain.Identifiable;
-import com.github.rrin.vulyk.domain.enums.UserRole;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -9,6 +8,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Entity
+@Table(name = "users")
 @Data
 @Builder
 @NoArgsConstructor

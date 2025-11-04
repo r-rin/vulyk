@@ -1,4 +1,4 @@
-package com.github.rrin.vulyk.domain.enums;
+package com.github.rrin.vulyk.domain.entity.post;
 
 public enum PostState {
     DRAFT,

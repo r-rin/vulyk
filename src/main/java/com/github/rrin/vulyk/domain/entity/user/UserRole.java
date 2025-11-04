@@ -1,4 +1,4 @@
-package com.github.rrin.vulyk.domain.enums;
+package com.github.rrin.vulyk.domain.entity.user;
 
 public enum UserRole {
     ADMIN, USER;

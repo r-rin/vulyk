@@ -1,6 +1,7 @@
-package com.github.rrin.vulyk.domain.entity.post;
+package com.github.rrin.vulyk.domain.entity.comment;
 
 import com.github.rrin.vulyk.domain.Identifiable;
+import com.github.rrin.vulyk.domain.entity.post.PostEntity;
 import com.github.rrin.vulyk.domain.entity.user.UserEntity;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -9,30 +10,32 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Entity
-@Table(name = "posts")
+@Table(name = "comments")
 @Data
 @Builder
-@AllArgsConstructor
 @NoArgsConstructor
-public class PostEntity implements Identifiable<Long> {
+@AllArgsConstructor
+public class CommentEntity implements Identifiable<Long> {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id", nullable = false)
     private Long id;
 
-    @Column(name = "title", nullable = false, length = 100)
-    private String title;
-
-    @Column(name = "content", nullable = false, length = 1000)
+    @Column(name = "content", nullable = false, length = 2000)
     private String content;
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "state", nullable = false, insertable = false)
-    private PostState state;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "post_id", nullable = false)
+    private PostEntity post;
 
-    @ManyToOne
-    @JoinColumn(name = "author_id")
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "author_id", nullable = false)
     private UserEntity author;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "parent_comment_id")
+    private CommentEntity parentComment;
 
     @Column(name = "created_at", nullable = false)
     private Long createdAt;
