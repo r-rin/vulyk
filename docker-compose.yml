@@ -1,0 +1,54 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: vulyk-postgres
+    environment:
+      POSTGRES_DB: vulyk
+      POSTGRES_USER: vulyk
+      POSTGRES_PASSWORD: vulyk_secure_password
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U vulyk"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - vulyk-network
+
+  vulyk-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: vulyk-app
+    environment:
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: vulyk
+      DB_USERNAME: vulyk
+      DB_PASSWORD: vulyk_secure_password
+    ports:
+      - "8080:8080"
+    volumes:
+      - app_uploads:/app/uploads
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - vulyk-network
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+    driver: local
+  app_uploads:
+    driver: local
+
+networks:
+  vulyk-network:
+    driver: bridge
+
