@@ -1,21 +1,25 @@
 package com.github.rrin.vulyk.domain.entity.comment;
 
 import com.github.rrin.vulyk.domain.Identifiable;
+import com.github.rrin.vulyk.domain.entity.AuditableEntity;
 import com.github.rrin.vulyk.domain.entity.post.PostEntity;
 import com.github.rrin.vulyk.domain.entity.user.UserEntity;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
+import lombok.experimental.SuperBuilder;
 
 @Entity
-@Table(name = "comments")
-@Data
-@Builder
+@Table(name = "comments", indexes = {
+    @Index(name = "idx_comments_post", columnList = "post_id"),
+    @Index(name = "idx_comments_author", columnList = "author_id"),
+    @Index(name = "idx_comments_parent", columnList = "parent_comment_id")
+})
+@Getter
+@Setter
+@SuperBuilder
 @NoArgsConstructor
 @AllArgsConstructor
-public class CommentEntity implements Identifiable<Long> {
+public class CommentEntity extends AuditableEntity implements Identifiable<Long> {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -36,21 +40,4 @@ public class CommentEntity implements Identifiable<Long> {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "parent_comment_id")
     private CommentEntity parentComment;
-
-    @Column(name = "created_at", nullable = false)
-    private Long createdAt;
-
-    @Column(name = "updated_at")
-    private Long updatedAt;
-
-    @PrePersist
-    protected void onCreate() {
-        createdAt = System.currentTimeMillis();
-        updatedAt = createdAt;
-    }
-
-    @PreUpdate
-    protected void onUpdate() {
-        updatedAt = System.currentTimeMillis();
-    }
 }

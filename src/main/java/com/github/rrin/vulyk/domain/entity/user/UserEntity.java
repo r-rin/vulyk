@@ -1,19 +1,22 @@
 package com.github.rrin.vulyk.domain.entity.user;
 
 import com.github.rrin.vulyk.domain.Identifiable;
+import com.github.rrin.vulyk.domain.entity.AuditableEntity;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
+import lombok.experimental.SuperBuilder;
 
 @Entity
-@Table(name = "users")
-@Data
-@Builder
+@Table(name = "users", indexes = {
+    @Index(name = "idx_users_email", columnList = "email"),
+    @Index(name = "idx_users_phone", columnList = "phone_number")
+})
+@Getter
+@Setter
+@SuperBuilder
 @NoArgsConstructor
 @AllArgsConstructor
-public class UserEntity implements Identifiable<Long> {
+public class UserEntity extends AuditableEntity implements Identifiable<Long> {
 
     @Id
     @Column(name = "id", nullable = false)
@@ -39,6 +42,6 @@ public class UserEntity implements Identifiable<Long> {
     private String phoneNumber;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "role", nullable = false, insertable = false)
+    @Column(name = "role", nullable = false)
     UserRole role;
 }

@@ -1,20 +1,24 @@
 package com.github.rrin.vulyk.domain.entity.post;
 
 import com.github.rrin.vulyk.domain.Identifiable;
+import com.github.rrin.vulyk.domain.entity.AuditableEntity;
 import com.github.rrin.vulyk.domain.entity.user.UserEntity;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
+import lombok.experimental.SuperBuilder;
 
 @Entity
-@Table(name = "posts")
-@Data
-@Builder
+@Table(name = "posts", indexes = {
+    @Index(name = "idx_posts_author", columnList = "author_id"),
+    @Index(name = "idx_posts_state", columnList = "state"),
+    @Index(name = "idx_posts_created_at", columnList = "created_at")
+})
+@Getter
+@Setter
+@SuperBuilder
 @AllArgsConstructor
 @NoArgsConstructor
-public class PostEntity implements Identifiable<Long> {
+public class PostEntity extends AuditableEntity implements Identifiable<Long> {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -27,27 +31,11 @@ public class PostEntity implements Identifiable<Long> {
     private String content;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "state", nullable = false, insertable = false)
-    private PostState state;
+    @Column(name = "state", nullable = false)
+    @Builder.Default
+    private PostState state = PostState.DRAFT;
 
     @ManyToOne
     @JoinColumn(name = "author_id")
     private UserEntity author;
-
-    @Column(name = "created_at", nullable = false)
-    private Long createdAt;
-
-    @Column(name = "updated_at")
-    private Long updatedAt;
-
-    @PrePersist
-    protected void onCreate() {
-        createdAt = System.currentTimeMillis();
-        updatedAt = createdAt;
-    }
-
-    @PreUpdate
-    protected void onUpdate() {
-        updatedAt = System.currentTimeMillis();
-    }
 }

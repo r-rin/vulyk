@@ -1,21 +1,24 @@
 package com.github.rrin.vulyk.domain.entity.file;
 
 import com.github.rrin.vulyk.domain.Identifiable;
+import com.github.rrin.vulyk.domain.entity.AuditableEntity;
 import com.github.rrin.vulyk.domain.entity.post.PostEntity;
 import com.github.rrin.vulyk.domain.entity.user.UserEntity;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
+import lombok.experimental.SuperBuilder;
 
 @Entity
-@Table(name = "file_attachments")
-@Data
-@Builder
+@Table(name = "file_attachments", indexes = {
+    @Index(name = "idx_file_uploader", columnList = "uploader_id"),
+    @Index(name = "idx_file_post", columnList = "post_id")
+})
+@Getter
+@Setter
+@SuperBuilder
 @NoArgsConstructor
 @AllArgsConstructor
-public class FileAttachmentEntity implements Identifiable<Long> {
+public class FileAttachmentEntity extends AuditableEntity implements Identifiable<Long> {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -44,13 +47,5 @@ public class FileAttachmentEntity implements Identifiable<Long> {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "post_id")
     private PostEntity post;
-
-    @Column(name = "created_at", nullable = false)
-    private Long createdAt;
-
-    @PrePersist
-    protected void onCreate() {
-        createdAt = System.currentTimeMillis();
-    }
 }
 

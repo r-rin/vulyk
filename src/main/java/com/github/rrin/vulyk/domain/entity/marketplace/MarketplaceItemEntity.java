@@ -1,22 +1,26 @@
 package com.github.rrin.vulyk.domain.entity.marketplace;
 
 import com.github.rrin.vulyk.domain.Identifiable;
+import com.github.rrin.vulyk.domain.entity.AuditableEntity;
 import com.github.rrin.vulyk.domain.entity.user.UserEntity;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
+import lombok.experimental.SuperBuilder;
 
 import java.math.BigDecimal;
 
 @Entity
-@Table(name = "marketplace_items")
-@Data
-@Builder
+@Table(name = "marketplace_items", indexes = {
+    @Index(name = "idx_marketplace_seller", columnList = "seller_id"),
+    @Index(name = "idx_marketplace_status", columnList = "status"),
+    @Index(name = "idx_marketplace_created_at", columnList = "created_at")
+})
+@Getter
+@Setter
+@SuperBuilder
 @NoArgsConstructor
 @AllArgsConstructor
-public class MarketplaceItemEntity implements Identifiable<Long> {
+public class MarketplaceItemEntity extends AuditableEntity implements Identifiable<Long> {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -33,28 +37,12 @@ public class MarketplaceItemEntity implements Identifiable<Long> {
     private BigDecimal price;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "status", nullable = false, insertable = false)
-    private MarketplaceItemStatus status;
+    @Column(name = "status", nullable = false)
+    @Builder.Default
+    private MarketplaceItemStatus status = MarketplaceItemStatus.AVAILABLE;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "seller_id", nullable = false)
     private UserEntity seller;
-
-    @Column(name = "created_at", nullable = false)
-    private Long createdAt;
-
-    @Column(name = "updated_at")
-    private Long updatedAt;
-
-    @PrePersist
-    protected void onCreate() {
-        createdAt = System.currentTimeMillis();
-        updatedAt = createdAt;
-    }
-
-    @PreUpdate
-    protected void onUpdate() {
-        updatedAt = System.currentTimeMillis();
-    }
 }
 
