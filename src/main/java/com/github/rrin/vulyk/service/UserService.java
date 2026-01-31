@@ -9,6 +9,8 @@ import com.github.rrin.vulyk.security.JwtTokenProvider;
 import com.github.rrin.vulyk.web.dto.auth.AuthResponse;
 import com.github.rrin.vulyk.web.dto.auth.LoginRequest;
 import com.github.rrin.vulyk.web.dto.auth.RegisterRequest;
+import com.github.rrin.vulyk.web.dto.user.UpdateProfileRequest;
+import com.github.rrin.vulyk.web.dto.user.UserProfileResponse;
 import java.util.Locale;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -68,7 +70,66 @@ public class UserService {
         return new AuthResponse(token);
     }
 
+    @Transactional(readOnly = true)
+    public UserProfileResponse getProfile(String principalEmail) {
+        UserEntity user = requireUserByEmail(principalEmail);
+        return toProfile(user);
+    }
+
+    @Transactional
+    public UserProfileResponse updateProfile(String principalEmail, UpdateProfileRequest request) {
+        UserEntity user = requireUserByEmail(principalEmail);
+
+        if (request.getEmail() != null) {
+            String normalizedEmail = normalizeEmail(request.getEmail());
+            if (!normalizedEmail.equalsIgnoreCase(user.getEmail())
+                && userRepository.findByEmail(normalizedEmail).isPresent()) {
+                throw new ValidationException("Email is already in use");
+            }
+            user.setEmail(normalizedEmail);
+        }
+
+        if (request.getUsername() != null) {
+            String newUsername = request.getUsername();
+            if (!newUsername.equals(user.getUsername())
+                && userRepository.findByUsername(newUsername).isPresent()) {
+                throw new ValidationException("Username is already taken");
+            }
+            user.setUsername(newUsername);
+        }
+
+        if (request.getName() != null) {
+            user.setName(request.getName());
+        }
+
+        if (request.getBio() != null) {
+            user.setBio(request.getBio());
+        }
+
+        if (request.getPhoneNumber() != null) {
+            user.setPhoneNumber(request.getPhoneNumber());
+        }
+
+        return toProfile(user);
+    }
+
     private String normalizeEmail(String email) {
         return email == null ? null : email.trim().toLowerCase(Locale.ROOT);
+    }
+
+    private UserProfileResponse toProfile(UserEntity user) {
+        return new UserProfileResponse(
+            user.getId(),
+            user.getUsername(),
+            user.getName(),
+            user.getBio(),
+            user.getEmail(),
+            user.getPhoneNumber()
+        );
+    }
+
+    private UserEntity requireUserByEmail(String email) {
+        return userRepository.findByEmail(email)
+            .orElseThrow(() -> new InvalidCredentials("User not found"));
     }
 }
