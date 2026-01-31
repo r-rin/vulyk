@@ -13,7 +13,11 @@ public interface FileAttachmentRepository extends JpaRepository<FileAttachmentEn
 
     List<FileAttachmentEntity> findAllByPostId(Long postId);
 
+    Page<FileAttachmentEntity> findAllByPostId(Long postId, Pageable pageable);
+
     Page<FileAttachmentEntity> findAllByUploaderId(Long uploaderId, Pageable pageable);
+
+    Page<FileAttachmentEntity> findAllByUploaderIdAndPostIsNull(Long uploaderId, Pageable pageable);
 
     Optional<FileAttachmentEntity> findByStoredFilename(String storedFilename);
 }

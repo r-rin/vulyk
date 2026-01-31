@@ -21,6 +21,16 @@ public interface PostRepository extends JpaRepository<PostEntity, Long> {
 
     Page<PostEntity> findAllByAuthorIdAndStateIn(Long authorId, Collection<PostState> states, Pageable pageable);
 
+    Page<PostEntity> findByTitleContainingIgnoreCaseOrContentContainingIgnoreCase(String title, String content, Pageable pageable);
+
+    Page<PostEntity> findByStateInAndTitleContainingIgnoreCaseOrStateInAndContentContainingIgnoreCase(
+        Collection<PostState> statesTitle,
+        String title,
+        Collection<PostState> statesContent,
+        String content,
+        Pageable pageable
+    );
+
     Optional<PostEntity> findByIdAndAuthorId(Long id, Long authorId);
 
     boolean existsByIdAndAuthorId(Long id, Long authorId);
