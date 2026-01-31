@@ -20,8 +20,8 @@ public class CustomUserDetailsService implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String identifier) {
-        UserEntity user = userRepository.findByEmail(identifier)
-                .orElseThrow(() -> new InvalidCredentials("Invalid email or password"));
+        UserEntity user = userRepository.findByEmailOrUsername(identifier)
+            .orElseThrow(() -> new InvalidCredentials("Invalid email or password"));
         Set<GrantedAuthority> authorities = Set.of(new SimpleGrantedAuthority(user.getRole().name()));
         return new User(user.getEmail(), user.getPasswordHash(), authorities);
     }
