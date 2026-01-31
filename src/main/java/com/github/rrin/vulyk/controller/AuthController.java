@@ -1,9 +1,9 @@
 package com.github.rrin.vulyk.controller;
 
 import com.github.rrin.vulyk.service.UserService;
-import com.github.rrin.vulyk.web.dto.auth.AuthResponse;
-import com.github.rrin.vulyk.web.dto.auth.LoginRequest;
-import com.github.rrin.vulyk.web.dto.auth.RegisterRequest;
+import com.github.rrin.vulyk.dto.auth.AuthResponse;
+import com.github.rrin.vulyk.dto.auth.LoginRequest;
+import com.github.rrin.vulyk.dto.auth.RegisterRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;

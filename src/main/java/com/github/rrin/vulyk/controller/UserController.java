@@ -1,8 +1,8 @@
 package com.github.rrin.vulyk.controller;
 
 import com.github.rrin.vulyk.service.UserService;
-import com.github.rrin.vulyk.web.dto.user.UpdateProfileRequest;
-import com.github.rrin.vulyk.web.dto.user.UserProfileResponse;
+import com.github.rrin.vulyk.dto.user.UpdateProfileRequest;
+import com.github.rrin.vulyk.dto.user.UserProfileResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;

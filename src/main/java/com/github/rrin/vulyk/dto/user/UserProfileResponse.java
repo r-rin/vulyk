@@ -1,4 +1,4 @@
-package com.github.rrin.vulyk.web.dto.user;
+package com.github.rrin.vulyk.dto.user;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
