@@ -16,4 +16,5 @@ public class UserProfileResponse {
     private String bio;
     private String email;
     private String phoneNumber;
+    private Long profilePictureId;
 }

@@ -124,7 +124,8 @@ public class UserService {
             user.getName(),
             user.getBio(),
             user.getEmail(),
-            user.getPhoneNumber()
+            user.getPhoneNumber(),
+            user.getProfilePicture() != null ? user.getProfilePicture().getId() : null
         );
     }
 

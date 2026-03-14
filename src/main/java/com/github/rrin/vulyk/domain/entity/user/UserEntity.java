@@ -2,6 +2,7 @@ package com.github.rrin.vulyk.domain.entity.user;
 
 import com.github.rrin.vulyk.domain.Identifiable;
 import com.github.rrin.vulyk.domain.entity.AuditableEntity;
+import com.github.rrin.vulyk.domain.entity.file.FileAttachmentEntity;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
@@ -44,4 +45,8 @@ public class UserEntity extends AuditableEntity implements Identifiable<Long> {
     @Enumerated(EnumType.STRING)
     @Column(name = "role", nullable = false)
     UserRole role;
+
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "profile_picture_id")
+    private FileAttachmentEntity profilePicture;
 }
