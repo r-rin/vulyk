@@ -76,6 +76,13 @@ public class UserService {
         return toProfile(user);
     }
 
+    @Transactional(readOnly = true)
+    public UserProfileResponse getProfileByUsername(String username) {
+        UserEntity user = userRepository.findByUsername(username)
+            .orElseThrow(() -> new InvalidCredentials("User not found"));
+        return toProfile(user);
+    }
+
     @Transactional
     public UserProfileResponse updateProfile(String principalEmail, UpdateProfileRequest request) {
         UserEntity user = requireUserByEmail(principalEmail);

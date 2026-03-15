@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Marketplace | Vulyk</title>
+    <link rel="stylesheet" href="/css/retro.css">
+    <script type="module" src="/js/app.js"></script>
+</head>
+<body class="retro-body" data-page="marketplace">
+<div class="page-shell strict-shell">
+    <nav class="command-bar" aria-label="Global command bar">
+        <div class="command-links">
+            <a class="command-link" href="/web/dashboard">Dashboard</a>
+            <a class="command-link" href="/web/profile">Profile</a>
+            <a class="command-link" href="/web/posts">Posts</a>
+            <a class="command-link" href="/web/profile/edit">Edit Profile</a>
+            <a class="command-link" href="/web/logout">Logout</a>
+        </div>
+    </nav>
+
+    <section class="window" th:if="${error != null}">
+        <div class="window-title">ERROR</div>
+        <div class="window-content" th:text="${error}">Error</div>
+    </section>
+
+    <section class="window" th:if="${notice != null}">
+        <div class="window-title">NOTICE</div>
+        <div class="window-content" th:text="${notice}">Notice</div>
+    </section>
+
+    <header class="window accent-blue">
+        <div class="window-title">MARKETPLACE OPERATIONS</div>
+        <div class="window-content">
+            <h1 class="strict-title">MARKETPLACE</h1>
+            <p class="panel-note">Publish offers, filter inventory, and execute seller-contact workflows.</p>
+        </div>
+    </header>
+
+    <div class="folder-tabs" aria-label="Content folders">
+        <a class="folder-tab" href="/web/posts">Posts</a>
+        <a class="folder-tab is-active" href="/web/marketplace">Marketplace</a>
+    </div>
+
+    <div class="workspace-layout no-sidebar">
+        <div class="workspace-main">
+            <section class="window accent-green">
+                <div class="window-title">CREATE ITEM</div>
+                <div class="window-content">
+                    <form id="market-create-form" class="retro-form" method="post" action="/web/marketplace">
+                        <label for="item-title">Title</label>
+                        <input id="item-title" name="title" maxlength="100" required>
+                        <label for="item-category">Category</label>
+                        <input id="item-category" name="category" maxlength="60">
+                        <label for="item-price">Price</label>
+                        <input id="item-price" name="price" type="number" min="0.01" step="0.01" required>
+                        <label for="item-description">Description</label>
+                        <textarea id="item-description" name="description" maxlength="2000" required></textarea>
+                        <button type="submit" class="btn btn-success">CREATE ITEM</button>
+                    </form>
+                </div>
+            </section>
+
+            <section class="window accent-yellow">
+                <div class="window-title">BROWSE ITEMS</div>
+                <div class="window-content">
+                    <form id="market-filter-form" class="retro-form compact-form" method="get" action="/web/marketplace">
+                        <label for="market-q">Search</label>
+                        <input id="market-q" name="q" maxlength="120" th:value="${query}">
+                        <label for="market-category-filter">Category</label>
+                        <input id="market-category-filter" name="category" maxlength="60" th:value="${category}">
+                        <label for="market-min-price">Min price</label>
+                        <input id="market-min-price" name="minPrice" type="number" min="0.01" step="0.01" th:value="${minPrice}">
+                        <label for="market-max-price">Max price</label>
+                        <input id="market-max-price" name="maxPrice" type="number" min="0.01" step="0.01" th:value="${maxPrice}">
+                        <label for="market-status">Status</label>
+                        <select id="market-status" name="status">
+                            <option value="" th:selected="${status == ''}">DEFAULT</option>
+                            <option value="AVAILABLE" th:selected="${status == 'AVAILABLE'}">AVAILABLE</option>
+                            <option value="SOLD" th:selected="${status == 'SOLD'}">SOLD</option>
+                            <option value="RESERVED" th:selected="${status == 'RESERVED'}">RESERVED</option>
+                            <option value="REMOVED" th:selected="${status == 'REMOVED'}">REMOVED</option>
+                        </select>
+                        <label for="market-sort">Sort by</label>
+                        <select id="market-sort" name="sortBy">
+                            <option value="createdAt" th:selected="${sortBy == 'createdAt'}">DATE</option>
+                            <option value="price" th:selected="${sortBy == 'price'}">PRICE</option>
+                            <option value="title" th:selected="${sortBy == 'title'}">TITLE</option>
+                        </select>
+                        <label for="market-dir">Direction</label>
+                        <select id="market-dir" name="sortDir">
+                            <option value="desc" th:selected="${sortDir == 'desc'}">DESC</option>
+                            <option value="asc" th:selected="${sortDir == 'asc'}">ASC</option>
+                        </select>
+                        <label class="checkbox-line">
+                            <input type="checkbox" id="market-own" name="ownOnly" value="true" th:checked="${ownOnly}">
+                            Own items only
+                        </label>
+                        <button type="submit" class="btn">SEARCH</button>
+                    </form>
+                    <div id="market-list" class="feed"
+                         th:attr="data-next-page=${itemsPage.number + 1},data-last=${itemsPage.last},data-query=${query},data-status=${status},data-category=${category},data-sort-by=${sortBy},data-sort-dir=${sortDir},data-min-price=${minPrice},data-max-price=${maxPrice},data-own-only=${ownOnly}">
+                        <article class="market-card" th:each="item : ${itemsPage.content}">
+                            <h3><a th:href="@{/web/marketplace/{id}(id=${item.id})}" th:text="${item.title}">title</a></h3>
+                            <p class="meta">
+                                <a th:href="@{/web/person/{username}(username=${item.sellerUsername})}" th:text="${item.sellerUsername}">seller</a>
+                                <span th:text="${item.status}">status</span>
+                                <span th:text="${item.category}">category</span>
+                            </p>
+                            <p th:text="${item.description}">description</p>
+                            <p class="price" th:text="'Price: ' + ${item.price}">Price</p>
+                            <a class="btn" th:href="@{/web/marketplace/{id}(id=${item.id})}">OPEN PAGE</a>
+                        </article>
+                    </div>
+                    <p id="market-empty" class="empty" th:if="${itemsPage.content.isEmpty()}">No items found.</p>
+                    <div id="market-scroll-sentinel" class="loading scroll-sentinel" th:if="${!itemsPage.last}">Loading more items...</div>
+                </div>
+            </section>
+        </div>
+    </div>
+</div>
+</body>
+</html>

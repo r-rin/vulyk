@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register | Vulyk</title>
+    <link rel="stylesheet" href="/css/retro.css">
+    <script type="module" src="/js/app.js"></script>
+</head>
+<body class="retro-body" data-page="register">
+<div class="page-shell strict-shell narrow-shell">
+    <nav class="command-bar" aria-label="Global command bar">
+        <div class="command-links">
+            <a class="command-link" href="/web/dashboard">Dashboard</a>
+            <a class="command-link" href="/web/login">Login</a>
+            <a class="command-link" href="/web/profile">Profile</a>
+            <a class="command-link" href="/web/marketplace">Marketplace</a>
+        </div>
+    </nav>
+
+    <section class="window" th:if="${error != null}">
+        <div class="window-title">ERROR</div>
+        <div class="window-content" th:text="${error}">Error</div>
+    </section>
+
+    <section class="window" th:if="${notice != null}">
+        <div class="window-title">NOTICE</div>
+        <div class="window-content" th:text="${notice}">Notice</div>
+    </section>
+
+    <header class="window accent-green">
+        <div class="window-title">ACCOUNT REGISTRATION</div>
+        <div class="window-content">
+            <h1 class="strict-title">REGISTER</h1>
+            <p class="panel-note">Create a new operator account with valid identity and contact fields.</p>
+            <form id="register-form" class="retro-form" method="post" action="/web/register">
+                <label for="reg-username">Username</label>
+                <input id="reg-username" name="username" type="text" maxlength="60" required>
+                <label for="reg-email">Email</label>
+                <input id="reg-email" name="email" type="email" maxlength="120" required>
+                <label for="reg-password">Password</label>
+                <input id="reg-password" name="password" type="password" maxlength="72" required>
+                <label for="reg-name">Name</label>
+                <input id="reg-name" name="name" type="text" maxlength="60">
+                <label for="reg-phone">Phone</label>
+                <input id="reg-phone" name="phoneNumber" type="text" maxlength="15">
+                <label for="reg-bio">Bio</label>
+                <textarea id="reg-bio" name="bio" maxlength="2000"></textarea>
+                <button type="submit" class="btn btn-success">CREATE ACCOUNT</button>
+            </form>
+            <div class="chip-row">
+                <span class="chip chip-green">FLOW: ONBOARDING</span>
+                <span class="chip chip-blue">NEXT: AUTH SESSION</span>
+            </div>
+            <p id="global-status" class="auth-status">Fill all required fields</p>
+            <p><a href="/web/login">Already registered? Login.</a></p>
+        </div>
+    </header>
+</div>
+</body>
+</html>

@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Post Detail | Vulyk</title>
+    <link rel="stylesheet" href="/css/retro.css">
+    <script type="module" src="/js/app.js"></script>
+</head>
+<body class="retro-body" data-page="post-detail" th:attr="data-post-id=${post.id}">
+<div class="page-shell strict-shell">
+    <nav class="command-bar" aria-label="Global command bar">
+        <div class="command-links">
+            <a class="command-link" href="/web/dashboard">Dashboard</a>
+            <a class="command-link" href="/web/posts">Posts</a>
+            <a class="command-link" href="/web/profile">Profile</a>
+            <a class="command-link" href="/web/marketplace">Marketplace</a>
+            <a class="command-link" href="/web/logout">Logout</a>
+        </div>
+    </nav>
+
+    <section class="window" th:if="${error != null}">
+        <div class="window-title">ERROR</div>
+        <div class="window-content" th:text="${error}">Error</div>
+    </section>
+
+    <section class="window" th:if="${notice != null}">
+        <div class="window-title">NOTICE</div>
+        <div class="window-content" th:text="${notice}">Notice</div>
+    </section>
+
+    <section class="window accent-blue">
+        <div class="window-title">POST INFO</div>
+        <div class="window-content post-detail-meta-window">
+            <a class="profile-avatar-wrap" th:href="@{/web/person/{username}(username=${post.authorUsername})}">
+                <img class="profile-avatar" th:src="${authorImageUrl}" th:alt="${authorDisplayName}">
+            </a>
+
+            <div class="post-detail-meta-panel">
+                <div class="profile-identity-meta post-detail-meta-list">
+                    <div>
+                        <strong>Author:</strong>
+                        <a id="post-detail-author-link" th:href="@{/web/person/{username}(username=${post.authorUsername})}" th:text="${post.authorUsername}">author</a>
+                    </div>
+                    <div>
+                        <strong>Name:</strong>
+                        <span th:text="${authorDisplayName}">Author Name</span>
+                    </div>
+                    <div>
+                        <strong>State:</strong>
+                        <span id="post-detail-state" th:text="${post.state}">PUBLISHED</span>
+                    </div>
+                    <div>
+                        <strong>Created:</strong>
+                        <span id="post-detail-created" th:text="${#temporals.format(post.createdAt, 'yyyy-MM-dd HH:mm')}">2026-03-15 00:00</span>
+                    </div>
+                    <div id="post-detail-updated-extra" th:attr="hidden=${post.updatedAt == null} ? 'hidden' : null">
+                        <strong>Updated:</strong>
+                        <span id="post-detail-updated-detail" th:text="${post.updatedAt != null ? #temporals.format(post.updatedAt, 'yyyy-MM-dd HH:mm') : ''}"></span>
+                    </div>
+                </div>
+                <div class="mini-actions">
+                    <button class="btn btn-icon state-toggle" type="button" id="post-like-toggle" data-liked="false" aria-pressed="false" title="Toggle like">
+                        <span class="heart-icon">&#9829;</span>
+                        <span class="like-count" id="post-detail-like-count">0</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="window accent-yellow">
+        <div class="window-title">POST CONTENT</div>
+        <div class="window-content" id="post-detail">
+            <article
+                id="post-detail-view"
+                class="post-card post-detail-card"
+                th:attr="data-post-title=${post.title},data-post-content=${post.content},data-post-state=${post.state},data-post-created-at=${post.createdAt},data-post-updated-at=${post.updatedAt},data-author-username=${post.authorUsername}">
+                <div class="post-head">
+                    <h2 id="post-detail-title" th:text="${post.title}">POST TITLE</h2>
+                    <button class="btn subtle-corner top-right" type="button" id="post-edit-toggle" title="Edit post" th:if="${canEditPost}">EDIT</button>
+                </div>
+                <p class="post-content" id="post-detail-content" th:text="${post.content}">POST CONTENT</p>
+            </article>
+
+            <section id="post-edit-panel" hidden th:if="${canEditPost}">
+                <article class="post-card post-detail-card">
+                    <div class="post-head">
+                        <h2>EDIT POST</h2>
+                        <button class="btn subtle-corner top-right" type="button" id="post-edit-cancel" title="Cancel editing">CANCEL</button>
+                    </div>
+                    <form class="retro-form" id="post-inline-edit-form">
+                        <label for="post-edit-title">Title</label>
+                        <input id="post-edit-title" name="title" maxlength="100" required th:value="${post.title}">
+
+                        <label for="post-edit-content">Content</label>
+                        <textarea id="post-edit-content" name="content" maxlength="1000" required th:text="${post.content}"></textarea>
+
+                        <label for="post-edit-state">State</label>
+                        <select id="post-edit-state" name="state">
+                            <option value="DRAFT" th:selected="${post.state != null and post.state.name() == 'DRAFT'}">DRAFT</option>
+                            <option value="PUBLISHED" th:selected="${post.state != null and post.state.name() == 'PUBLISHED'}">PUBLISHED</option>
+                            <option value="HIDDEN" th:selected="${post.state != null and post.state.name() == 'HIDDEN'}">HIDDEN</option>
+                            <option value="REDACTED" th:selected="${post.state != null and post.state.name() == 'REDACTED'}">REDACTED</option>
+                        </select>
+
+                        <div class="mini-actions">
+                            <button type="submit" class="btn">SAVE</button>
+                            <button type="button" class="btn btn-danger" id="post-delete-btn">DELETE</button>
+                        </div>
+                    </form>
+                </article>
+            </section>
+        </div>
+    </section>
+
+    <section class="window accent-red" id="post-files-section" th:attr="hidden=${#lists.isEmpty(attachments)} ? 'hidden' : null">
+        <div class="window-title">ATTACHMENTS</div>
+        <div class="window-content">
+            <form id="post-file-form" class="inline-form two-col" hidden>
+                <input type="file" name="file" required>
+                <button class="btn" type="submit">UPLOAD FILE</button>
+            </form>
+            <div id="post-files" class="comments-list">
+                <div class="empty" th:if="${#lists.isEmpty(attachments)}">No files attached.</div>
+                <div class="file-row" data-context="post" th:each="attachment : ${attachments}">
+                    <div><strong th:text="${attachment.originalFilename != null ? attachment.originalFilename : '(unnamed)'}">file.bin</strong></div>
+                    <div class="file-meta">
+                        <span th:text="'ID ' + ${attachment.id}">ID 1</span>
+                        <span th:text="' | ' + ${attachment.contentType != null ? attachment.contentType : 'unknown'}"> | application/octet-stream</span>
+                        <span th:text="' | ' + ${attachment.fileSize != null ? attachment.fileSize : 0} + ' bytes'"> | 0 bytes</span>
+                        <span th:text="' | ' + ${#temporals.format(attachment.createdAt, 'yyyy-MM-dd HH:mm')}"> | 2026-03-15 00:00</span>
+                    </div>
+                    <div class="mini-actions">
+                        <button class="btn" type="button" data-action="download-file" th:attr="data-file-id=${attachment.id}">DOWNLOAD</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="window accent-blue">
+        <div class="window-title">COMMENTS</div>
+        <div class="window-content">
+            <form id="post-comment-form" class="retro-form">
+                <label for="post-comment-content">Add comment</label>
+                <textarea id="post-comment-content" name="content" maxlength="2000" required></textarea>
+                <button class="btn" type="submit">CREATE COMMENT</button>
+            </form>
+
+            <div id="post-comments" class="comments-list"></div>
+            <button id="post-comments-load-more" type="button" class="linkish-btn" hidden>Load more comments</button>
+        </div>
+    </section>
+</div>
+</body>
+</html>

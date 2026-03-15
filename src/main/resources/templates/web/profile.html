@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profile | Vulyk</title>
+    <link rel="stylesheet" href="/css/retro.css">
+    <script type="module" src="/js/app.js"></script>
+</head>
+<body class="retro-body" data-page="profile">
+<div class="page-shell strict-shell">
+    <nav class="command-bar" aria-label="Global command bar">
+        <div class="command-links">
+            <a class="command-link" href="/web/dashboard">Dashboard</a>
+            <a class="command-link" href="/web/profile/edit">Edit Profile</a>
+            <a class="command-link" href="/web/posts">Posts</a>
+            <a class="command-link" href="/web/marketplace">Marketplace</a>
+            <a class="command-link" href="/web/logout">Logout</a>
+        </div>
+    </nav>
+
+    <section class="window" th:if="${error != null}">
+        <div class="window-title">ERROR</div>
+        <div class="window-content" th:text="${error}">Error</div>
+    </section>
+
+    <section class="window" th:if="${notice != null}">
+        <div class="window-title">NOTICE</div>
+        <div class="window-content" th:text="${notice}">Notice</div>
+    </section>
+
+    <header class="window accent-blue">
+        <div class="window-title">USER PROFILE</div>
+        <div class="window-content">
+            <h1 class="strict-title">PROFILE OVERVIEW</h1>
+            <p class="panel-note">Operational profile summary with personal data and authored content.</p>
+            <p><a href="/web/profile/edit">Edit profile</a> | <a href="/web/profile/files">My files</a> | <a href="/web/dashboard">Dashboard</a></p>
+        </div>
+    </header>
+
+    <div class="folder-tabs" aria-label="Profile folders">
+        <a class="folder-tab" th:classappend="${activeProfileTab == 'posts'} ? ' is-active' : ''" href="/web/profile?tab=posts">My Posts</a>
+        <a class="folder-tab" th:classappend="${activeProfileTab == 'marketplace'} ? ' is-active' : ''" href="/web/profile?tab=marketplace">My Marketplace</a>
+    </div>
+
+    <div class="workspace-layout">
+        <aside class="window accent-blue profile-sticky">
+            <div class="window-title">ACCOUNT DETAILS</div>
+            <div class="window-content">
+                <div class="profile-identity">
+                    <div class="profile-avatar-wrap">
+                        <img class="profile-avatar" th:src="${profileImageUrl}" th:alt="${profileDisplayName}">
+                    </div>
+                </div>
+                <div id="profile-table" class="table-grid">
+                    <div class="row"><span class="cell label">Username</span><span class="cell" th:text="${viewProfile.username}">-</span></div>
+                    <div class="row"><span class="cell label">Name</span><span class="cell" th:text="${viewProfile.name}">-</span></div>
+                    <!-- <div class="row"><span class="cell label">Email</span><span class="cell" th:text="${viewProfile.email}">-</span></div> -->
+                    <!-- <div class="row"><span class="cell label">Phone</span><span class="cell" th:text="${viewProfile.phoneNumber}">-</span></div> -->
+                </div>
+            </div>
+        </aside>
+
+        <div class="workspace-main">
+            <section class="window accent-blue">
+                <div class="window-title">BIO</div>
+                <div class="window-content">
+                    <p class="post-content" th:if="${viewProfile.bio != null and !viewProfile.bio.isEmpty()}" th:text="${viewProfile.bio}">Bio text</p>
+                    <p class="empty" th:if="${viewProfile.bio == null or viewProfile.bio.isEmpty()}">No bio provided.</p>
+                </div>
+            </section>
+
+            <section class="window accent-green" th:if="${activeProfileTab == 'posts'}">
+                <div class="window-title">MY RECENT POSTS</div>
+                <div class="window-content">
+                    <div id="profile-posts" class="feed" th:if="${!ownPosts.isEmpty()}">
+                        <article class="post-card" th:each="post : ${ownPosts}">
+                            <h3><a th:href="@{/web/posts/{id}(id=${post.id})}" th:text="${post.title}">title</a></h3>
+                            <p class="meta"><span th:text="${post.state}">state</span></p>
+                            <p th:text="${post.content}">content</p>
+                        </article>
+                    </div>
+                    <p class="empty" th:if="${ownPosts.isEmpty()}">No posts.</p>
+                </div>
+            </section>
+
+            <section class="window accent-yellow" th:if="${activeProfileTab == 'marketplace'}">
+                <div class="window-title">MY MARKETPLACE ITEMS</div>
+                <div class="window-content">
+                    <div id="profile-market" class="feed" th:if="${!ownItems.isEmpty()}">
+                        <article class="market-card" th:each="item : ${ownItems}">
+                            <h3><a th:href="@{/web/marketplace/{id}(id=${item.id})}" th:text="${item.title}">title</a></h3>
+                            <p class="meta"><span th:text="${item.status}">status</span></p>
+                            <p th:text="${item.description}">description</p>
+                        </article>
+                    </div>
+                    <p class="empty" th:if="${ownItems.isEmpty()}">No items.</p>
+                </div>
+            </section>
+        </div>
+    </div>
+
+</div>
+</body>
+</html>

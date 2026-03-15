@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Person | Vulyk</title>
+    <link rel="stylesheet" href="/css/retro.css">
+    <script type="module" src="/js/app.js"></script>
+</head>
+<body class="retro-body" data-page="person-detail">
+<div class="page-shell strict-shell">
+    <nav class="command-bar" aria-label="Global command bar">
+        <div class="command-links">
+            <a class="command-link" href="/web/dashboard">Dashboard</a>
+            <a class="command-link" href="/web/profile">Profile</a>
+            <a class="command-link" href="/web/posts">Posts</a>
+            <a class="command-link" href="/web/marketplace">Marketplace</a>
+            <a class="command-link" href="/web/logout">Logout</a>
+        </div>
+    </nav>
+
+    <header class="window accent-blue">
+        <div class="window-title">PERSON PAGE</div>
+        <div class="window-content">
+            <h1 class="strict-title" id="person-title" th:text="${person.username}">USER</h1>
+            <p id="global-status" class="auth-status">Person loaded.</p>
+        </div>
+    </header>
+
+    <section class="window accent-green" id="person-self-actions" th:if="${isAuthenticated and principalUsername == person.username}">
+        <div class="window-title">SELF ACTIONS</div>
+        <div class="window-content">
+            <a class="btn" href="/web/profile/edit">EDIT MY PROFILE</a>
+        </div>
+    </section>
+
+    <section class="window accent-yellow">
+        <div class="window-title">PUBLIC POSTS</div>
+        <div class="window-content">
+            <div id="person-posts" class="feed" th:if="${!personPosts.isEmpty()}">
+                <article class="post-card" th:each="post : ${personPosts}">
+                    <h3><a th:href="@{/web/posts/{id}(id=${post.id})}" th:text="${post.title}">title</a></h3>
+                    <p class="meta"><span th:text="${post.state}">state</span></p>
+                    <p th:text="${post.content}">content</p>
+                </article>
+            </div>
+            <p class="empty" th:if="${personPosts.isEmpty()}">No posts.</p>
+        </div>
+    </section>
+
+    <section class="window accent-red">
+        <div class="window-title">PUBLIC MARKETPLACE ITEMS</div>
+        <div class="window-content">
+            <div id="person-items" class="feed" th:if="${!personItems.isEmpty()}">
+                <article class="market-card" th:each="item : ${personItems}">
+                    <h3><a th:href="@{/web/marketplace/{id}(id=${item.id})}" th:text="${item.title}">title</a></h3>
+                    <p class="meta"><span th:text="${item.status}">status</span></p>
+                    <p th:text="${item.description}">description</p>
+                </article>
+            </div>
+            <p class="empty" th:if="${personItems.isEmpty()}">No items.</p>
+        </div>
+    </section>
+</div>
+</body>
+</html>

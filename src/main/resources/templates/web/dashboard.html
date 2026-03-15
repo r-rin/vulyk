@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vulyk Dashboard</title>
+    <link rel="stylesheet" href="/css/retro.css">
+    <script type="module" src="/js/app.js"></script>
+</head>
+<body class="retro-body" data-page="dashboard">
+<div class="page-shell strict-shell">
+    <nav class="command-bar" aria-label="Global command bar">
+        <div class="command-links">
+            <a class="command-link" href="/web/dashboard">Dashboard</a>
+            <a class="command-link" href="/web/profile">Profile</a>
+            <a class="command-link" href="/web/posts">Posts</a>
+            <a class="command-link" href="/web/marketplace">Marketplace</a>
+            <a class="command-link" href="/web/login">Login</a>
+            <a class="command-link" href="/web/logout">Logout</a>
+        </div>
+    </nav>
+
+    <section class="window" th:if="${error != null}">
+        <div class="window-title">ERROR</div>
+        <div class="window-content" th:text="${error}">Error</div>
+    </section>
+
+    <section class="window" th:if="${notice != null}">
+        <div class="window-title">NOTICE</div>
+        <div class="window-content" th:text="${notice}">Notice</div>
+    </section>
+
+    <header class="window accent-blue">
+        <div class="window-content">
+            <h1 class="strict-title">DASHBOARD</h1>
+            <p class="panel-note">Primary control surface for account, publishing, and marketplace workflows.</p>
+        </div>
+    </header>
+
+    <section class="layout-grid two-col">
+        <div class="window accent-green">
+            <div class="window-title">PRIMARY TASKS</div>
+            <div class="window-content nav-grid">
+                <a class="btn btn-primary" href="/web/login">LOGIN</a>
+                <a class="btn btn-success" href="/web/register">REGISTER</a>
+                <a class="btn" href="/web/profile">PROFILE</a>
+                <a class="btn" href="/web/profile/edit">EDIT PROFILE</a>
+                <a class="btn" href="/web/posts">POSTS</a>
+                <a class="btn" href="/web/marketplace">MARKETPLACE</a>
+                <a class="btn btn-danger" href="/web/logout">LOGOUT</a>
+            </div>
+        </div>
+
+        <div class="window accent-yellow">
+            <div class="window-title">NEWS</div>
+            <div class="window-content">
+                <p class="panel-note">Use PROFILE EDIT for identity updates and avatar upload.</p>
+                <hr class="hr-groove">
+                <p class="panel-note">Use PROFILE EDIT for identity updates and avatar upload.</p>
+                <hr class="hr-groove">
+                <p class="panel-note">Use PROFILE EDIT for identity updates and avatar upload.</p>
+                <hr class="hr-groove">
+                <p class="panel-note">Use PROFILE EDIT for identity updates and avatar upload.</p>
+                <hr class="hr-groove">
+                <p class="panel-note">Use PROFILE EDIT for identity updates and avatar upload.</p>
+                <hr class="hr-groove">
+                <p class="panel-note">Use POSTS and MARKETPLACE pages for create/filter/list operations.</p>
+                <hr class="hr-groove">
+                <p class="panel-note">Use LOGOUT page to clear client session token.</p>
+            </div>
+        </div>
+    </section>
+</div>
+</body>
+</html>

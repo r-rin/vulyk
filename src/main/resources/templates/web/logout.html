@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Logout | Vulyk</title>
+    <link rel="stylesheet" href="/css/retro.css">
+    <script type="module" src="/js/app.js"></script>
+</head>
+<body class="retro-body" data-page="logout">
+<div class="page-shell strict-shell narrow-shell">
+    <nav class="command-bar" aria-label="Global command bar">
+        <div class="command-links">
+            <a class="command-link" href="/web/dashboard">Dashboard</a>
+            <a class="command-link" href="/web/login">Login</a>
+            <a class="command-link" href="/web/profile">Profile</a>
+            <a class="command-link" href="/web/posts">Posts</a>
+        </div>
+    </nav>
+
+    <section class="window" th:if="${error != null}">
+        <div class="window-title">ERROR</div>
+        <div class="window-content" th:text="${error}">Error</div>
+    </section>
+
+    <section class="window" th:if="${notice != null}">
+        <div class="window-title">NOTICE</div>
+        <div class="window-content" th:text="${notice}">Notice</div>
+    </section>
+
+    <header class="window accent-red">
+        <div class="window-title">SESSION TERMINATION</div>
+        <div class="window-content">
+            <h1 class="strict-title">LOGOUT</h1>
+            <p class="panel-note">Current session token is being invalidated and removed from local storage.</p>
+            <form method="post" action="/web/logout">
+                <button type="submit" class="btn btn-danger">CONFIRM LOGOUT</button>
+            </form>
+        </div>
+    </header>
+</div>
+</body>
+</html>

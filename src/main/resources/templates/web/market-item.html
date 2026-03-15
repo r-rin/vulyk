@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Item Detail | Vulyk</title>
+    <link rel="stylesheet" href="/css/retro.css">
+    <script type="module" src="/js/app.js"></script>
+</head>
+<body class="retro-body" data-page="market-item-detail">
+<div class="page-shell strict-shell">
+    <nav class="command-bar" aria-label="Global command bar">
+        <div class="command-links">
+            <a class="command-link" href="/web/dashboard">Dashboard</a>
+            <a class="command-link" href="/web/marketplace">Marketplace</a>
+            <a class="command-link" href="/web/profile">Profile</a>
+            <a class="command-link" href="/web/posts">Posts</a>
+            <a class="command-link" href="/web/logout">Logout</a>
+        </div>
+    </nav>
+
+    <section class="window" th:if="${error != null}">
+        <div class="window-title">ERROR</div>
+        <div class="window-content" th:text="${error}">Error</div>
+    </section>
+
+    <section class="window" th:if="${notice != null}">
+        <div class="window-title">NOTICE</div>
+        <div class="window-content" th:text="${notice}">Notice</div>
+    </section>
+
+    <header class="window accent-blue">
+        <div class="window-title">ITEM TITLE</div>
+        <div class="window-content">
+            <h1 class="strict-title" th:text="${item.status}">object</h1>
+        </div>
+    </header>
+
+    <section class="window accent-yellow">
+        <div class="window-title">ITEM CONTENT</div>
+        <div class="window-content" id="item-detail">
+            <h2 th:text="${item.title}">title</h2>
+            <p class="meta">
+                <a th:href="@{/web/person/{username}(username=${item.sellerUsername})}" th:text="${item.sellerUsername}">seller</a>
+                <span th:text="${item.status}">status</span>
+                <span th:text="${item.category}">category</span>
+            </p>
+            <p th:text="${item.description}">description</p>
+            <p class="price" th:text="'Price: ' + ${item.price}">price</p>
+            <p th:if="${favoriteStatus != null}">Favorite: <strong th:text="${favoriteStatus.favorite}">false</strong>, Count: <strong th:text="${favoriteStatus.count}">0</strong></p>
+        </div>
+    </section>
+
+    <section class="window accent-red" id="item-visitor-section" th:if="${!isOwner}">
+        <div class="window-title">BUYER ACTIONS</div>
+        <div class="window-content">
+            <div class="mini-actions">
+                <form method="post" th:action="@{/web/marketplace/{id}/contact(id=${item.id})}">
+                    <button class="btn" type="submit">CONTACT SELLER</button>
+                </form>
+                <form method="post" th:action="@{/web/marketplace/{id}/favorite(id=${item.id})}">
+                    <button class="btn btn-success" type="submit">FAVORITE</button>
+                </form>
+                <form method="post" th:action="@{/web/marketplace/{id}/unfavorite(id=${item.id})}">
+                    <button class="btn btn-danger" type="submit">UNFAVORITE</button>
+                </form>
+            </div>
+        </div>
+    </section>
+
+    <section class="window accent-green" id="item-owner-section" th:if="${isOwner}">
+        <div class="window-title">OWNER ACTIONS</div>
+        <div class="window-content">
+            <form id="item-edit-form" class="retro-form" method="post" th:action="@{/web/marketplace/{id}/update(id=${item.id})}">
+                <label for="item-edit-title">Title</label>
+                <input id="item-edit-title" name="title" maxlength="100" required th:value="${item.title}">
+                <label for="item-edit-description">Description</label>
+                <textarea id="item-edit-description" name="description" maxlength="2000" required th:text="${item.description}"></textarea>
+                <label for="item-edit-category">Category</label>
+                <input id="item-edit-category" name="category" maxlength="60" th:value="${item.category}">
+                <label for="item-edit-price">Price</label>
+                <input id="item-edit-price" name="price" type="number" min="0.01" step="0.01" required th:value="${item.price}">
+                <label for="item-edit-status">Status</label>
+                <select id="item-edit-status" name="status">
+                    <option value="AVAILABLE" th:selected="${item.status.name() == 'AVAILABLE'}">AVAILABLE</option>
+                    <option value="RESERVED" th:selected="${item.status.name() == 'RESERVED'}">RESERVED</option>
+                    <option value="SOLD" th:selected="${item.status.name() == 'SOLD'}">SOLD</option>
+                    <option value="REMOVED" th:selected="${item.status.name() == 'REMOVED'}">REMOVED</option>
+                </select>
+                <div class="mini-actions">
+                    <button type="submit" class="btn">SAVE ITEM</button>
+                </div>
+            </form>
+            <form method="post" th:action="@{/web/marketplace/{id}/status(id=${item.id})}">
+                <label for="item-only-status">Status only</label>
+                <select id="item-only-status" name="status">
+                    <option value="AVAILABLE">AVAILABLE</option>
+                    <option value="RESERVED">RESERVED</option>
+                    <option value="SOLD">SOLD</option>
+                    <option value="REMOVED">REMOVED</option>
+                </select>
+                <div class="mini-actions">
+                    <button type="submit" class="btn btn-success">SET STATUS</button>
+                </div>
+            </form>
+            <form method="post" th:action="@{/web/marketplace/{id}/delete(id=${item.id})}">
+                <div class="mini-actions">
+                    <button type="submit" class="btn btn-danger" data-confirm="Delete this item?">DELETE ITEM</button>
+                </div>
+            </form>
+        </div>
+    </section>
+</div>
+</body>
+</html>

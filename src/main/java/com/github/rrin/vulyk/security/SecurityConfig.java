@@ -30,9 +30,30 @@ public class SecurityConfig {
             .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers(
+                    "/",
+                    "/app",
+                    "/dashboard",
+                    "/web/dashboard",
+                    "/web/posts",
+                    "/web/posts/*",
+                    "/web/login",
+                    "/web/register",
+                    "/web/logout",
+                    "/login-page",
+                    "/register-page",
+                    "/profile-page",
+                    "/profile-edit-page",
+                    "/posts-page",
+                    "/post-page",
+                    "/marketplace-page",
+                    "/market-item-page",
+                    "/person-page",
+                    "/logout-page",
+                    "/favicon.ico",
                     "/login",
                     "/register",
-                    "/error"
+                    "/error",
+                    "/css/**"
                 ).permitAll()
                 .anyRequest().authenticated()
             )
