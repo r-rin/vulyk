@@ -16,6 +16,7 @@ public class MarketplaceItemResponse {
     private Long id;
     private String title;
     private String description;
+    private String category;
     private BigDecimal price;
     private MarketplaceItemStatus status;
     private String sellerUsername;

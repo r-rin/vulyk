@@ -33,6 +33,9 @@ public class MarketplaceItemEntity extends AuditableEntity implements Identifiab
     @Column(name = "description", nullable = false, length = 2000)
     private String description;
 
+    @Column(name = "category", length = 60)
+    private String category;
+
     @Column(name = "price", nullable = false, precision = 19, scale = 2)
     private BigDecimal price;
 

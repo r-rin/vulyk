@@ -25,6 +25,9 @@ public class MarketplaceItemRequest {
     @Size(max = 2000)
     private String description;
 
+    @Size(max = 60)
+    private String category;
+
     @NotNull
     @DecimalMin(value = "0.01")
     private BigDecimal price;
