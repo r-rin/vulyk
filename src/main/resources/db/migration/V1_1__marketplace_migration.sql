@@ -10,10 +10,10 @@ CREATE TABLE marketplace_item_favorites
 );
 
 ALTER TABLE marketplace_items
-    ADD category VARCHAR(60);
+    ADD COLUMN category VARCHAR(60);
 
 ALTER TABLE users
-    ADD profile_picture_id BIGINT;
+    ADD COLUMN profile_picture_id BIGINT;
 
 ALTER TABLE marketplace_item_favorites
     ADD CONSTRAINT uc_9b8adaceaa11b6ed736daaafd UNIQUE (user_id, item_id);
@@ -34,6 +34,4 @@ CREATE INDEX idx_marketplace_favorites_user ON marketplace_item_favorites (user_
 ALTER TABLE users
     ADD CONSTRAINT FK_USERS_ON_PROFILE_PICTURE FOREIGN KEY (profile_picture_id) REFERENCES file_attachments (id);
 
-CREATE INDEX idx_users_email ON users (email);
-
-CREATE INDEX idx_users_phone ON users (phone_number);
+CREATE INDEX idx_users_profile_picture ON users (profile_picture_id);
