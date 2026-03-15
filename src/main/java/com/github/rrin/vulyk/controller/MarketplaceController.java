@@ -1,8 +1,11 @@
 package com.github.rrin.vulyk.controller;
 
 import com.github.rrin.vulyk.domain.entity.marketplace.MarketplaceItemStatus;
+import com.github.rrin.vulyk.dto.marketplace.MarketplaceContactResponse;
+import com.github.rrin.vulyk.dto.marketplace.MarketplaceFavoriteStatusResponse;
 import com.github.rrin.vulyk.dto.marketplace.MarketplaceItemRequest;
 import com.github.rrin.vulyk.dto.marketplace.MarketplaceItemResponse;
+import com.github.rrin.vulyk.dto.marketplace.MarketplaceSellerResponse;
 import com.github.rrin.vulyk.dto.marketplace.MarketplaceItemStatusRequest;
 import com.github.rrin.vulyk.exception.ValidationException;
 import com.github.rrin.vulyk.service.MarketplaceService;
@@ -46,8 +49,11 @@ public class MarketplaceController {
         @PageableDefault(size = 20) Pageable pageable,
         @RequestParam(name = "q", required = false) String query,
         @RequestParam(name = "status", required = false) String status,
+        @RequestParam(name = "category", required = false) String category,
         @RequestParam(name = "minPrice", required = false) BigDecimal minPrice,
         @RequestParam(name = "maxPrice", required = false) BigDecimal maxPrice,
+        @RequestParam(name = "sortBy", required = false) String sortBy,
+        @RequestParam(name = "sortDir", required = false, defaultValue = "desc") String sortDir,
         @RequestParam(name = "ownOnly", required = false, defaultValue = "false") Boolean ownOnly,
         @AuthenticationPrincipal String principalEmail
     ) {
@@ -64,8 +70,11 @@ public class MarketplaceController {
             pageable,
             query,
             parsedStatus,
+            category,
             minPrice,
             maxPrice,
+            sortBy,
+            sortDir,
             ownOnly,
             principalEmail
         );
@@ -101,5 +110,50 @@ public class MarketplaceController {
         @AuthenticationPrincipal String principalEmail
     ) {
         marketplaceService.delete(itemId, principalEmail);
+    }
+
+    @GetMapping("/{itemId}/seller")
+    public MarketplaceSellerResponse sellerProfile(@PathVariable Long itemId) {
+        return marketplaceService.getSellerProfile(itemId);
+    }
+
+    @GetMapping("/{itemId}/contact")
+    public MarketplaceContactResponse contactSeller(
+        @PathVariable Long itemId,
+        @AuthenticationPrincipal String principalEmail
+    ) {
+        return marketplaceService.contactSeller(itemId, principalEmail);
+    }
+
+    @PostMapping("/{itemId}/favorite")
+    public MarketplaceFavoriteStatusResponse favorite(
+        @PathVariable Long itemId,
+        @AuthenticationPrincipal String principalEmail
+    ) {
+        return marketplaceService.favorite(itemId, principalEmail);
+    }
+
+    @DeleteMapping("/{itemId}/favorite")
+    public MarketplaceFavoriteStatusResponse unfavorite(
+        @PathVariable Long itemId,
+        @AuthenticationPrincipal String principalEmail
+    ) {
+        return marketplaceService.unfavorite(itemId, principalEmail);
+    }
+
+    @GetMapping("/{itemId}/favorite")
+    public MarketplaceFavoriteStatusResponse favoriteStatus(
+        @PathVariable Long itemId,
+        @AuthenticationPrincipal String principalEmail
+    ) {
+        return marketplaceService.favoriteStatus(itemId, principalEmail);
+    }
+
+    @GetMapping("/favorites")
+    public Page<MarketplaceItemResponse> favoriteItems(
+        @AuthenticationPrincipal String principalEmail,
+        @PageableDefault(size = 20) Pageable pageable
+    ) {
+        return marketplaceService.listFavoriteItems(principalEmail, pageable);
     }
 }
