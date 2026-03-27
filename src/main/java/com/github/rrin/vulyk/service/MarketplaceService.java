@@ -14,9 +14,7 @@ import com.github.rrin.vulyk.exception.ValidationException;
 import com.github.rrin.vulyk.repository.MarketplaceFavoriteRepository;
 import com.github.rrin.vulyk.repository.MarketplaceItemRepository;
 import com.github.rrin.vulyk.repository.UserRepository;
-import jakarta.persistence.criteria.Predicate;
 import java.math.BigDecimal;
-import java.util.ArrayList;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -24,9 +22,10 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import com.github.rrin.vulyk.service.marketplace.MarketplaceBrowseCriteria;
+import com.github.rrin.vulyk.service.marketplace.MarketplaceBrowseQueryService;
 
 @Service
 @RequiredArgsConstructor
@@ -35,6 +34,7 @@ public class MarketplaceService {
     private final MarketplaceItemRepository marketplaceItemRepository;
     private final MarketplaceFavoriteRepository marketplaceFavoriteRepository;
     private final UserRepository userRepository;
+    private final MarketplaceBrowseQueryService marketplaceBrowseQueryService;
 
     @Transactional
     public MarketplaceItemResponse create(String principalEmail, MarketplaceItemRequest request) {
@@ -54,9 +54,14 @@ public class MarketplaceService {
     }
 
     @Transactional(readOnly = true)
-    public MarketplaceItemResponse get(Long itemId) {
+    public MarketplaceItemResponse get(Long itemId, String principalEmail) {
         MarketplaceItemEntity item = marketplaceItemRepository.findById(itemId)
             .orElseThrow(() -> new NotFoundException("Marketplace item not found"));
+
+        if (!canViewItem(item, principalEmail)) {
+            throw new NotFoundException("Marketplace item not found");
+        }
+
         return toResponse(item);
     }
 
@@ -90,42 +95,21 @@ public class MarketplaceService {
             ? requireUser(principalEmail).getId()
             : null;
 
-        Specification<MarketplaceItemEntity> specification = (root, queryObj, cb) -> {
-            List<Predicate> predicates = new ArrayList<>();
+        MarketplaceItemStatus effectiveStatus = resolveVisibleStatus(status, Boolean.TRUE.equals(ownOnly));
 
-            if (query != null && !query.isBlank()) {
-                String like = "%" + query.trim().toLowerCase() + "%";
-                predicates.add(cb.or(
-                    cb.like(cb.lower(root.get("title")), like),
-                    cb.like(cb.lower(root.get("description")), like)
-                ));
-            }
+        MarketplaceBrowseCriteria criteria = new MarketplaceBrowseCriteria(
+            query,
+            effectiveStatus,
+            normalizedCategory,
+            minPrice,
+            maxPrice,
+            Boolean.TRUE.equals(ownOnly),
+            principalUserId,
+            sortBy,
+            sortDirection
+        );
 
-            if (status != null) {
-                predicates.add(cb.equal(root.get("status"), status));
-            } else if (!Boolean.TRUE.equals(ownOnly)) {
-                predicates.add(cb.equal(root.get("status"), MarketplaceItemStatus.AVAILABLE));
-            }
-
-            if (normalizedCategory != null) {
-                predicates.add(cb.equal(cb.lower(root.get("category")), normalizedCategory.toLowerCase()));
-            }
-
-            if (minPrice != null) {
-                predicates.add(cb.greaterThanOrEqualTo(root.get("price"), minPrice));
-            }
-            if (maxPrice != null) {
-                predicates.add(cb.lessThanOrEqualTo(root.get("price"), maxPrice));
-            }
-
-            if (principalUserId != null) {
-                predicates.add(cb.equal(root.get("seller").get("id"), principalUserId));
-            }
-
-            return cb.and(predicates.toArray(new Predicate[0]));
-        };
-
-        return marketplaceItemRepository.findAll(specification, effectivePageable)
+        return marketplaceBrowseQueryService.browse(criteria, effectivePageable)
             .map(this::toResponse);
     }
 
@@ -266,6 +250,27 @@ public class MarketplaceService {
         if (item.getSeller() == null || !item.getSeller().getEmail().equalsIgnoreCase(principalEmail)) {
             throw new ValidationException("Only the seller can modify this marketplace item");
         }
+    }
+
+    private boolean canViewItem(MarketplaceItemEntity item, String principalEmail) {
+        if (item.getStatus() == MarketplaceItemStatus.AVAILABLE) {
+            return true;
+        }
+
+        if (principalEmail == null || principalEmail.isBlank()) {
+            return false;
+        }
+
+        return item.getSeller() != null
+            && item.getSeller().getEmail() != null
+            && item.getSeller().getEmail().equalsIgnoreCase(principalEmail);
+    }
+
+    private MarketplaceItemStatus resolveVisibleStatus(MarketplaceItemStatus requestedStatus, boolean ownOnly) {
+        if (!ownOnly) {
+            return MarketplaceItemStatus.AVAILABLE;
+        }
+        return requestedStatus;
     }
 
     private UserEntity requireUser(String email) {

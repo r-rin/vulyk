@@ -81,8 +81,11 @@ public class MarketplaceController {
     }
 
     @GetMapping("/{itemId}")
-    public MarketplaceItemResponse get(@PathVariable Long itemId) {
-        return marketplaceService.get(itemId);
+    public MarketplaceItemResponse get(
+        @PathVariable Long itemId,
+        @AuthenticationPrincipal String principalEmail
+    ) {
+        return marketplaceService.get(itemId, principalEmail);
     }
 
     @PutMapping("/{itemId}")

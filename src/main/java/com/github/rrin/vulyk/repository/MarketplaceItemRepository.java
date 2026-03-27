@@ -32,4 +32,6 @@ public interface MarketplaceItemRepository extends JpaRepository<MarketplaceItem
     );
 
     Optional<MarketplaceItemEntity> findByIdAndSellerId(Long id, Long sellerId);
+
+    Optional<MarketplaceItemEntity> findBySellerIdAndTitleIgnoreCase(Long sellerId, String title);
 }

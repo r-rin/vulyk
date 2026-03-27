@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${lab.id + ' | ' + lab.title}">SQLI-01</title>
+    <link rel="stylesheet" href="/css/retro.css">
+    <link rel="stylesheet" href="/css/labs.css">
+</head>
+<body class="retro-body lab-body">
+<div class="lab-shell">
+    <nav class="command-bar" aria-label="Global command bar">
+        <div class="command-links">
+            <a class="command-link" href="/web/labs">Labs</a>
+            <a class="command-link" th:href="${lab.entryPath}">Current Task</a>
+            <a class="command-link" href="/web/marketplace">Open Marketplace</a>
+            <a class="command-link" href="/web/login">Login</a>
+            <a class="command-link" href="/web/dashboard">Dashboard</a>
+        </div>
+    </nav>
+
+    <header class="lab-hero">
+        <p class="lab-kicker" th:text="${lab.category}">SQL Injection</p>
+        <h1 th:text="${lab.id + ' - ' + lab.title}">SQLI-01</h1>
+        <p th:text="${lab.description}">Description</p>
+    </header>
+
+    <section class="window" th:if="${error != null}">
+        <div class="window-title">ERROR</div>
+        <div class="window-content" th:text="${error}">Error</div>
+    </section>
+
+    <section class="window" th:if="${notice != null}">
+        <div class="window-title">NOTICE</div>
+        <div class="window-content" th:text="${notice}">Notice</div>
+    </section>
+
+    <section class="lab-summary">
+        <article class="lab-stat">
+            <span>Status</span>
+            <strong th:text="${labProgress.status}">ACTIVE</strong>
+        </article>
+        <article class="lab-stat">
+            <span>Points</span>
+            <strong th:text="${labProgress.pointsEarned} + ' / ' + ${labProgress.points}">0 / 0</strong>
+        </article>
+    </section>
+
+    <section class="lab-grid single-column-grid">
+        <article class="lab-card">
+            <div class="lab-card-head">
+                <h2>Tasks</h2>
+                <span class="lab-status" th:classappend="' is-' + ${#strings.toLowerCase(labProgress.status.name())}" th:text="${labProgress.status}">ACTIVE</span>
+            </div>
+
+            <div class="lab-task-list">
+                <div class="lab-task-row" th:each="task : ${labProgress.tasks}">
+                    <div>
+                        <strong th:text="${task.title}">Task</strong>
+                        <p th:text="${task.description}">Description</p>
+                        <div class="lab-hint-list" th:if="${!#lists.isEmpty(task.hints)}">
+                            <div class="lab-hint-card" th:each="hint : ${task.hints}">
+                                <div class="lab-hint-head">
+                                    <strong th:text="${hint.title}">Hint</strong>
+                                    <span th:text="'-' + ${hint.penalty} + ' max'">-15 max</span>
+                                </div>
+                                <p th:if="${hint.revealed}" th:text="${hint.content}">Hint content</p>
+                                <form th:if="${!hint.revealed and task.status.name() != 'COMPLETED'}" method="post" th:action="${lab.entryPath + '/tasks/' + task.id + '/hints/' + hint.id}">
+                                    <button type="submit" class="btn">REVEAL HINT</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="lab-task-points" th:text="${task.pointsEarned} + ' / ' + ${task.maxPointsAvailable} + ' max'">0 / 100 max</div>
+                </div>
+            </div>
+
+            <form class="lab-flag-form" method="post" th:action="${lab.entryPath + '/submit-flag'}">
+                <label for="lab-flag">Flag submission</label>
+                <input id="lab-flag" name="flag" type="text" placeholder="flag{...}" required>
+                <button type="submit" class="btn">SUBMIT FLAG</button>
+            </form>
+        </article>
+    </section>
+</div>
+</body>
+</html>

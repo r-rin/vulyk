@@ -605,7 +605,7 @@ public class WebPageController {
         @PathVariable Long itemId,
         Model model
     ) {
-        MarketplaceItemResponse item = marketplaceService.get(itemId);
+        MarketplaceItemResponse item = marketplaceService.get(itemId, principalEmail);
         addAuthModel(principalEmail, model);
 
         model.addAttribute("item", item);

@@ -41,6 +41,8 @@ public class SecurityConfig {
                     "/web/labs/**",
                     "/dashboard",
                     "/web/dashboard",
+                    "/web/marketplace",
+                    "/web/marketplace/*",
                     "/web/posts",
                     "/web/posts/*",
                     "/web/login",
