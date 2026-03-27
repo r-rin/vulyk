@@ -9,6 +9,13 @@
 </head>
 <body class="retro-body" data-page="login">
 <div class="page-shell strict-shell narrow-shell">
+    <nav class="command-bar" aria-label="Global command bar">
+        <div class="command-links">
+            <a class="command-link" href="/web/dashboard">Dashboard</a>
+            <a class="command-link" href="/web/labs">Labs</a>
+            <a class="command-link" href="/web/register">Register</a>
+        </div>
+    </nav>
 
     <section class="window" th:if="${error != null}">
         <div class="window-title">ERROR</div>

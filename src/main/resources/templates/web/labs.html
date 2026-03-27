@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Public Labs | Vulyk</title>
+    <link rel="stylesheet" href="/css/retro.css">
+    <link rel="stylesheet" href="/css/labs.css">
+</head>
+<body class="retro-body lab-body">
+<div class="lab-shell">
+    <nav class="command-bar" aria-label="Global command bar">
+        <div class="command-links">
+            <a class="command-link" href="/web/labs">Labs</a>
+            <a class="command-link" href="/web/marketplace">Marketplace</a>
+            <a class="command-link" href="/web/login">Login</a>
+            <a class="command-link" href="/web/register">Register</a>
+            <a class="command-link" href="/web/dashboard">Dashboard</a>
+        </div>
+    </nav>
+
+    <header class="lab-hero">
+        <p class="lab-kicker">Public Training Labs</p>
+        <h1>Lab Catalog</h1>
+        <p>Open a lab page for instructions, hints, and flag submission. Perform the actual exploit on the simulation website itself.</p>
+    </header>
+
+    <section class="lab-summary" th:if="${taskCatalog != null}">
+        <article class="lab-stat">
+            <span>Total Points</span>
+            <strong th:text="${taskCatalog.earnedPoints} + ' / ' + ${taskCatalog.totalPoints}">0 / 0</strong>
+        </article>
+        <article class="lab-stat">
+            <span>Completed</span>
+            <strong th:text="${taskCatalog.completedCount} + ' / ' + ${taskCatalog.totalLabs}">0 / 0</strong>
+        </article>
+    </section>
+
+    <section class="window" th:if="${error != null}">
+        <div class="window-title">ERROR</div>
+        <div class="window-content" th:text="${error}">Error</div>
+    </section>
+
+    <section class="window" th:if="${notice != null}">
+        <div class="window-title">NOTICE</div>
+        <div class="window-content" th:text="${notice}">Notice</div>
+    </section>
+
+    <section class="lab-grid" th:if="${taskCatalog != null}">
+        <article class="lab-card" th:each="variant : ${taskCatalog.vulnerabilities}">
+            <div class="lab-card-head">
+                <h2 th:text="${variant.id + ' - ' + variant.title}">Task</h2>
+                <span class="lab-status" th:classappend="' is-' + ${#strings.toLowerCase(variant.status)}" th:text="${variant.status}">STATUS</span>
+            </div>
+            <p class="lab-category" th:text="${variant.category}">Category</p>
+            <p class="lab-description" th:text="${variant.description}">Description</p>
+            <p class="lab-points">Points: <strong th:text="${variant.pointsEarned} + ' / ' + ${variant.points}">0 / 0</strong></p>
+            <p><a th:href="${variant.entryPath}">Open lab page</a></p>
+
+            <div class="lab-task-list">
+                <div class="lab-task-row" th:each="task : ${variant.tasks}">
+                    <div>
+                        <strong th:text="${task.title}">Task</strong>
+                        <p th:text="${task.description}">Description</p>
+                    </div>
+                    <div class="lab-task-points" th:text="${task.pointsEarned} + ' / ' + ${task.maxPointsAvailable} + ' max'">0 / 0 max</div>
+                </div>
+            </div>
+        </article>
+    </section>
+</div>
+</body>
+</html>

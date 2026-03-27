@@ -15,6 +15,7 @@
             <a class="command-link" href="/web/profile">Profile</a>
             <a class="command-link" href="/web/posts">Posts</a>
             <a class="command-link" href="/web/profile/edit">Edit Profile</a>
+            <a class="command-link" href="/web/labs">Labs</a>
             <a class="command-link" href="/web/logout">Logout</a>
         </div>
     </nav>
@@ -77,9 +78,6 @@
                         <select id="market-status" name="status">
                             <option value="" th:selected="${status == ''}">DEFAULT</option>
                             <option value="AVAILABLE" th:selected="${status == 'AVAILABLE'}">AVAILABLE</option>
-                            <option value="SOLD" th:selected="${status == 'SOLD'}">SOLD</option>
-                            <option value="RESERVED" th:selected="${status == 'RESERVED'}">RESERVED</option>
-                            <option value="REMOVED" th:selected="${status == 'REMOVED'}">REMOVED</option>
                         </select>
                         <label for="market-sort">Sort by</label>
                         <select id="market-sort" name="sortBy">
