@@ -148,8 +148,8 @@ public class WebPageController {
                 email,
                 password,
                 name,
-                phoneNumber,
-                bio
+                    bio,
+                    phoneNumber
             )).getToken();
             addJwtCookie(response, token);
             redirectAttributes.addFlashAttribute("notice", "Account created and authenticated.");
