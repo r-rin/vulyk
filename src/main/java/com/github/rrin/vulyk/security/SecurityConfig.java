@@ -32,6 +32,13 @@ public class SecurityConfig {
                 .requestMatchers(
                     "/",
                     "/app",
+                    "/api/internal/labs",
+                    "/api/internal/labs/**",
+                    "/labs/**",
+                    "/tasks",
+                        "/tasks/**",
+                    "/web/labs",
+                    "/web/labs/**",
                     "/dashboard",
                     "/web/dashboard",
                     "/web/posts",
