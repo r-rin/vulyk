@@ -36,6 +36,7 @@ public class LabProgressService {
 
     private final List<LabDefinition> activeLabs;
     private final LabFlagRepository labFlagRepository;
+    private final LabFlagVerificationService labFlagVerificationService;
     private final LabHintRevealRepository labHintRevealRepository;
     private final LabTaskProgressRepository labTaskProgressRepository;
 
@@ -77,8 +78,10 @@ public class LabProgressService {
         ensureProgressRows(labDefinition);
 
         String normalizedFlag = normalizeFlag(flagValue);
-        LabFlagEntity expectedFlag = labFlagRepository.findByLabIdAndFlagValue(labDefinition.getId(), normalizedFlag)
-            .orElseThrow(() -> new ValidationException("Flag was not accepted for this lab"));
+        LabFlagEntity expectedFlag = labFlagVerificationService.requireMatchingFlag(labDefinition.getId(), normalizedFlag);
+        if (expectedFlag == null) {
+            throw new ValidationException("Flag was not accepted for this lab");
+        }
 
         LabTaskProgressEntity progress = labTaskProgressRepository.findByLabIdAndTaskId(
             expectedFlag.getLabId(),
@@ -96,7 +99,7 @@ public class LabProgressService {
             progress.setStatus(LabTaskProgressStatus.COMPLETED);
             progress.setPointsAwarded(awardedPoints);
             progress.setCompletedAt(Instant.now());
-            progress.setEvidence("flag:" + expectedFlag.getFlagValue());
+            progress.setEvidence("flag-submission:" + expectedFlag.getTaskId());
             labTaskProgressRepository.save(progress);
         }
 

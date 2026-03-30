@@ -19,7 +19,7 @@ import lombok.experimental.SuperBuilder;
 @Entity
 @Table(name = "lab_flags", uniqueConstraints = {
     @UniqueConstraint(name = "uc_lab_flags_lab_task", columnNames = {"lab_id", "task_id"}),
-    @UniqueConstraint(name = "uc_lab_flags_flag_value", columnNames = {"flag_value"})
+    @UniqueConstraint(name = "uc_lab_flags_flag_hash", columnNames = {"flag_hash"})
 }, indexes = {
     @Index(name = "idx_lab_flags_lab", columnList = "lab_id")
 })
@@ -41,8 +41,8 @@ public class LabFlagEntity extends AuditableEntity implements Identifiable<Long>
     @Column(name = "task_id", nullable = false, length = 128)
     private String taskId;
 
-    @Column(name = "flag_value", nullable = false, length = 255)
-    private String flagValue;
+    @Column(name = "flag_hash", nullable = false, length = 255)
+    private String flagHash;
 
     @Column(name = "seed_context", length = 255)
     private String seedContext;
