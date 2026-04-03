@@ -41,10 +41,11 @@ public class CommentController {
     @GetMapping("/posts/{postId}/comments")
     public Page<CommentResponse> listForPost(
         @PathVariable Long postId,
+        @AuthenticationPrincipal String principalEmail,
         @RequestParam(value = "parentCommentId", required = false) Long parentCommentId,
         @PageableDefault(size = 20) Pageable pageable
     ) {
-        return commentService.listForPost(postId, parentCommentId, pageable);
+        return commentService.listForPost(postId, principalEmail, parentCommentId, pageable);
     }
 
     @PutMapping("/comments/{commentId}")

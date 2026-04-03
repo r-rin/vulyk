@@ -66,9 +66,8 @@ public class WebPageController {
     ) {
         addAuthModel(principalEmail, model);
 
-        Page<PostResponse> recentPosts = postService.list(
+        Page<PostResponse> recentPosts = postService.listPublic(
             PageRequest.of(0, 6, Sort.by(Sort.Direction.DESC, "createdAt")),
-            List.of(PostState.PUBLISHED),
             null
         );
         model.addAttribute("recentPosts", recentPosts.getContent());
@@ -189,15 +188,13 @@ public class WebPageController {
         UserProfileResponse profile = userService.getProfile(principalEmail);
         model.addAttribute("viewProfile", profile);
 
-        Page<PostResponse> profilePosts = postService.list(
+        Page<PostResponse> profilePosts = postService.listOwn(
             PageRequest.of(0, 12, Sort.by(Sort.Direction.DESC, "createdAt")),
-            List.of(PostState.PUBLISHED, PostState.DRAFT, PostState.HIDDEN, PostState.REDACTED),
+            principalEmail,
+            List.of(PostState.PUBLISHED),
             null
         );
-        List<PostResponse> ownPosts = profilePosts.getContent().stream()
-            .filter(post -> profile.getUsername().equals(post.getAuthorUsername()))
-            .toList();
-        model.addAttribute("ownPosts", ownPosts);
+        model.addAttribute("ownPosts", profilePosts.getContent());
 
         Page<MarketplaceItemResponse> ownItems = marketplaceService.list(
             PageRequest.of(0, 12, Sort.by(Sort.Direction.DESC, "createdAt")),
@@ -234,6 +231,20 @@ public class WebPageController {
         );
         model.addAttribute("uploadsPage", uploads);
         return "web/profile-files";
+    }
+
+    @GetMapping("/web/posts/create")
+    public String createPostPage(
+        @AuthenticationPrincipal String principalEmail,
+        Model model
+    ) {
+        if (!isAuthenticatedPrincipal(principalEmail)) {
+            return "redirect:/web/login";
+        }
+
+        addAuthModel(principalEmail, model);
+        model.addAttribute("defaultPostState", PostState.DRAFT.name());
+        return "web/post-create";
     }
 
     @GetMapping("/web/profile/edit")
@@ -298,21 +309,31 @@ public class WebPageController {
     public String posts(
         @AuthenticationPrincipal String principalEmail,
         @RequestParam(name = "q", required = false) String query,
-        @RequestParam(name = "state", required = false) String state,
+        @RequestParam(name = "tab", defaultValue = "feed") String tab,
         @RequestParam(name = "page", defaultValue = "0") int page,
         Model model
     ) {
-        List<PostState> states = parseStateFilter(state);
-        Page<PostResponse> posts = postService.list(
-            PageRequest.of(Math.max(page, 0), 10, Sort.by(Sort.Direction.DESC, "createdAt")),
-            states,
-            query
-        );
+        boolean draftsTab = "drafts".equalsIgnoreCase(tab);
+        if (draftsTab && !isAuthenticatedPrincipal(principalEmail)) {
+            return "redirect:/web/login";
+        }
+
+        Page<PostResponse> posts = draftsTab
+            ? postService.listOwn(
+                PageRequest.of(Math.max(page, 0), 10, Sort.by(Sort.Direction.DESC, "createdAt")),
+                principalEmail,
+                List.of(PostState.DRAFT),
+                query
+            )
+            : postService.listPublic(
+                PageRequest.of(Math.max(page, 0), 10, Sort.by(Sort.Direction.DESC, "createdAt")),
+                query
+            );
 
         addAuthModel(principalEmail, model);
         model.addAttribute("postsPage", posts);
         model.addAttribute("query", query == null ? "" : query);
-        model.addAttribute("state", state == null ? "" : state);
+        model.addAttribute("activePostsTab", draftsTab ? "drafts" : "feed");
         return "web/posts";
     }
 
@@ -321,6 +342,7 @@ public class WebPageController {
         @AuthenticationPrincipal String principalEmail,
         @RequestParam String title,
         @RequestParam String content,
+        @RequestParam(name = "state", defaultValue = "DRAFT") String state,
         RedirectAttributes redirectAttributes
     ) {
         if (!isAuthenticatedPrincipal(principalEmail)) {
@@ -328,13 +350,20 @@ public class WebPageController {
         }
 
         try {
-            postService.create(principalEmail, new PostRequest(title, content));
-            redirectAttributes.addFlashAttribute("notice", "Post published.");
+            PostState initialState = parseCreatePostState(state);
+            PostResponse post = postService.create(principalEmail, new PostRequest(title, content, initialState));
+            redirectAttributes.addFlashAttribute(
+                "notice",
+                post.getState() == PostState.DRAFT ? "Draft saved." : "Post published."
+            );
+            if (post.getState() == PostState.DRAFT) {
+                return "redirect:/web/posts?tab=drafts";
+            }
+            return "redirect:/web/posts/" + post.getId();
         } catch (RuntimeException ex) {
             redirectAttributes.addFlashAttribute("error", ex.getMessage());
+            return "redirect:/web/posts/create";
         }
-
-        return "redirect:/web/posts";
     }
 
     @GetMapping("/web/posts/{postId}")
@@ -343,7 +372,7 @@ public class WebPageController {
         @PathVariable Long postId,
         Model model
     ) {
-        PostResponse post = postService.get(postId);
+        PostResponse post = postService.get(postId, principalEmail);
         UserProfileResponse authorProfile = userService.getProfileByUsername(post.getAuthorUsername());
         List<FileAttachmentResponse> attachments = List.of();
         if (isAuthenticatedPrincipal(principalEmail)) {
@@ -377,7 +406,7 @@ public class WebPageController {
         }
 
         try {
-            postService.update(postId, principalEmail, new PostRequest(title, content));
+            postService.update(postId, principalEmail, new PostRequest(title, content, null));
             redirectAttributes.addFlashAttribute("notice", "Post updated.");
         } catch (RuntimeException ex) {
             redirectAttributes.addFlashAttribute("error", ex.getMessage());
@@ -573,6 +602,19 @@ public class WebPageController {
         return "web/marketplace";
     }
 
+    @GetMapping("/web/marketplace/create")
+    public String createMarketplacePage(
+        @AuthenticationPrincipal String principalEmail,
+        Model model
+    ) {
+        if (!isAuthenticatedPrincipal(principalEmail)) {
+            return "redirect:/web/login";
+        }
+
+        addAuthModel(principalEmail, model);
+        return "web/marketplace-create";
+    }
+
     @PostMapping("/web/marketplace")
     public String createMarketplaceItem(
         @AuthenticationPrincipal String principalEmail,
@@ -587,16 +629,16 @@ public class WebPageController {
         }
 
         try {
-            marketplaceService.create(
+            MarketplaceItemResponse item = marketplaceService.create(
                 principalEmail,
                 new MarketplaceItemRequest(title, description, category, price, MarketplaceItemStatus.AVAILABLE)
             );
             redirectAttributes.addFlashAttribute("notice", "Marketplace item created.");
+            return "redirect:/web/marketplace/" + item.getId();
         } catch (RuntimeException ex) {
             redirectAttributes.addFlashAttribute("error", ex.getMessage());
+            return "redirect:/web/marketplace/create";
         }
-
-        return "redirect:/web/marketplace";
     }
 
     @GetMapping("/web/marketplace/{itemId}")
@@ -606,10 +648,14 @@ public class WebPageController {
         Model model
     ) {
         MarketplaceItemResponse item = marketplaceService.get(itemId, principalEmail);
+        UserProfileResponse sellerProfile = userService.getProfileByUsername(item.getSellerUsername());
         addAuthModel(principalEmail, model);
 
         model.addAttribute("item", item);
         model.addAttribute("isOwner", isCurrentUser(item.getSellerUsername(), principalEmail));
+        model.addAttribute("sellerProfile", sellerProfile);
+        model.addAttribute("sellerDisplayName", displayName(sellerProfile));
+        model.addAttribute("sellerImageUrl", profileImageUrl(sellerProfile));
 
         if (isAuthenticatedPrincipal(principalEmail)) {
             model.addAttribute("favoriteStatus", marketplaceService.favoriteStatus(itemId, principalEmail));
@@ -757,39 +803,31 @@ public class WebPageController {
     public String personPage(
         @AuthenticationPrincipal String principalEmail,
         @PathVariable String username,
+        @RequestParam(name = "tab", defaultValue = "posts") String tab,
         Model model
     ) {
         UserProfileResponse person = userService.getProfileByUsername(username);
         addAuthModel(principalEmail, model);
 
-        Page<PostResponse> posts = postService.list(
+        Page<PostResponse> posts = postService.listByAuthorUsername(
             PageRequest.of(0, 20, Sort.by(Sort.Direction.DESC, "createdAt")),
+            username,
             List.of(PostState.PUBLISHED),
             null
         );
-        List<PostResponse> personPosts = posts.getContent().stream()
-            .filter(post -> username.equals(post.getAuthorUsername()))
-            .toList();
 
-        Page<MarketplaceItemResponse> items = marketplaceService.list(
+        Page<MarketplaceItemResponse> items = marketplaceService.listBySellerUsername(
+            username,
             PageRequest.of(0, 20, Sort.by(Sort.Direction.DESC, "createdAt")),
-            null,
-            null,
-            null,
-            null,
-            null,
-            "createdAt",
-            "desc",
-            false,
             principalEmail
         );
-        List<MarketplaceItemResponse> personItems = items.getContent().stream()
-            .filter(item -> username.equals(item.getSellerUsername()))
-            .toList();
 
         model.addAttribute("person", person);
-        model.addAttribute("personPosts", personPosts);
-        model.addAttribute("personItems", personItems);
+        model.addAttribute("personPosts", posts.getContent());
+        model.addAttribute("personItems", items.getContent());
+        model.addAttribute("activeProfileTab", "marketplace".equalsIgnoreCase(tab) ? "marketplace" : "posts");
+        model.addAttribute("personDisplayName", displayName(person));
+        model.addAttribute("personImageUrl", profileImageUrl(person));
         return "web/person";
     }
 
@@ -899,6 +937,22 @@ public class WebPageController {
 
         try {
             return List.of(PostState.valueOf(state.trim().toUpperCase(Locale.ROOT)));
+        } catch (IllegalArgumentException ex) {
+            throw new ValidationException("Invalid post state: " + state);
+        }
+    }
+
+    private PostState parseCreatePostState(String state) {
+        if (state == null || state.isBlank()) {
+            return PostState.DRAFT;
+        }
+
+        try {
+            PostState parsed = PostState.valueOf(state.trim().toUpperCase(Locale.ROOT));
+            if (parsed != PostState.DRAFT && parsed != PostState.PUBLISHED) {
+                throw new ValidationException("Posts can only be created as draft or published");
+            }
+            return parsed;
         } catch (IllegalArgumentException ex) {
             throw new ValidationException("Invalid post state: " + state);
         }

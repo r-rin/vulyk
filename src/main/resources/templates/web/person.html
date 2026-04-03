@@ -20,47 +20,78 @@
     </nav>
 
     <header class="window accent-blue">
-        <div class="window-title">PERSON PAGE</div>
+        <div class="window-title">PERSON PROFILE</div>
         <div class="window-content">
-            <h1 class="strict-title" id="person-title" th:text="${person.username}">USER</h1>
-            <p id="global-status" class="auth-status">Person loaded.</p>
+            <h1 class="strict-title" id="person-title" th:text="${personDisplayName}">USER</h1>
+            <p class="panel-note">Public profile view. Only content visible to other people is shown here.</p>
+            <div class="panel-action-row">
+                <a class="btn" th:href="@{/web/person/{username}(username=${person.username})}">Overview</a>
+                <a class="btn" th:href="@{/web/person/{username}(username=${person.username},tab='posts')}">Posts</a>
+                <a class="btn" th:href="@{/web/person/{username}(username=${person.username},tab='marketplace')}">Marketplace</a>
+                <a class="btn" th:if="${isAuthenticated and principalUsername == person.username}" href="/web/profile">Open My Profile</a>
+            </div>
         </div>
     </header>
 
-    <section class="window accent-green" id="person-self-actions" th:if="${isAuthenticated and principalUsername == person.username}">
-        <div class="window-title">SELF ACTIONS</div>
-        <div class="window-content">
-            <a class="btn" href="/web/profile/edit">EDIT MY PROFILE</a>
-        </div>
-    </section>
+    <div class="folder-tabs" aria-label="Profile folders">
+        <a class="folder-tab" th:classappend="${activeProfileTab == 'posts'} ? ' is-active' : ''" th:href="@{/web/person/{username}(username=${person.username},tab='posts')}">Posts</a>
+        <a class="folder-tab" th:classappend="${activeProfileTab == 'marketplace'} ? ' is-active' : ''" th:href="@{/web/person/{username}(username=${person.username},tab='marketplace')}">Marketplace</a>
+    </div>
 
-    <section class="window accent-yellow">
-        <div class="window-title">PUBLIC POSTS</div>
-        <div class="window-content">
-            <div id="person-posts" class="feed" th:if="${!personPosts.isEmpty()}">
-                <article class="post-card" th:each="post : ${personPosts}">
-                    <h3><a th:href="@{/web/posts/{id}(id=${post.id})}" th:text="${post.title}">title</a></h3>
-                    <p class="meta"><span th:text="${post.state}">state</span></p>
-                    <p th:text="${post.content}">content</p>
-                </article>
+    <div class="workspace-layout">
+        <aside class="window accent-blue profile-sticky">
+            <div class="window-title">ACCOUNT DETAILS</div>
+            <div class="window-content">
+                <div class="profile-identity">
+                    <div class="profile-avatar-wrap">
+                        <img class="profile-avatar" th:src="${personImageUrl}" th:alt="${personDisplayName}">
+                    </div>
+                </div>
+                <div id="person-table" class="table-grid">
+                    <div class="row"><span class="cell label">Username</span><span class="cell" th:text="${person.username}">-</span></div>
+                    <div class="row"><span class="cell label">Name</span><span class="cell" th:text="${person.name}">-</span></div>
+                </div>
             </div>
-            <p class="empty" th:if="${personPosts.isEmpty()}">No posts.</p>
-        </div>
-    </section>
+        </aside>
 
-    <section class="window accent-red">
-        <div class="window-title">PUBLIC MARKETPLACE ITEMS</div>
-        <div class="window-content">
-            <div id="person-items" class="feed" th:if="${!personItems.isEmpty()}">
-                <article class="market-card" th:each="item : ${personItems}">
-                    <h3><a th:href="@{/web/marketplace/{id}(id=${item.id})}" th:text="${item.title}">title</a></h3>
-                    <p class="meta"><span th:text="${item.status}">status</span></p>
-                    <p th:text="${item.description}">description</p>
-                </article>
-            </div>
-            <p class="empty" th:if="${personItems.isEmpty()}">No items.</p>
+        <div class="workspace-main">
+            <section class="window accent-blue">
+                <div class="window-title">BIO</div>
+                <div class="window-content">
+                    <p class="post-content" th:if="${person.bio != null and !person.bio.isEmpty()}" th:text="${person.bio}">Bio text</p>
+                    <p class="empty" th:if="${person.bio == null or person.bio.isEmpty()}">No bio provided.</p>
+                </div>
+            </section>
+
+            <section class="window accent-green" th:if="${activeProfileTab == 'posts'}">
+                <div class="window-title">PUBLIC POSTS</div>
+                <div class="window-content">
+                    <div id="person-posts" class="feed" th:if="${!personPosts.isEmpty()}">
+                        <article class="post-card" th:each="post : ${personPosts}">
+                            <h3><a th:href="@{/web/posts/{id}(id=${post.id})}" th:text="${post.title}">title</a></h3>
+                            <p class="meta"><span th:text="${post.state}">state</span></p>
+                            <p th:text="${post.content}">content</p>
+                        </article>
+                    </div>
+                    <p class="empty" th:if="${personPosts.isEmpty()}">No public posts.</p>
+                </div>
+            </section>
+
+            <section class="window accent-yellow" th:if="${activeProfileTab == 'marketplace'}">
+                <div class="window-title">PUBLIC MARKETPLACE ITEMS</div>
+                <div class="window-content">
+                    <div id="person-items" class="feed" th:if="${!personItems.isEmpty()}">
+                        <article class="market-card" th:each="item : ${personItems}">
+                            <h3><a th:href="@{/web/marketplace/{id}(id=${item.id})}" th:text="${item.title}">title</a></h3>
+                            <p class="meta"><span th:text="${item.status}">status</span><span th:text="${item.category}">category</span></p>
+                            <p th:text="${item.description}">description</p>
+                        </article>
+                    </div>
+                    <p class="empty" th:if="${personItems.isEmpty()}">No public items.</p>
+                </div>
+            </section>
         </div>
-    </section>
+    </div>
 </div>
 </body>
 </html>

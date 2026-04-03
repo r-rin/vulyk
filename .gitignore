@@ -44,3 +44,5 @@ bin/
 .DS_Store
 
 /uploads/**
+/.github/**
+**/resources/static/*.html

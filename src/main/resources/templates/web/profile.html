@@ -34,7 +34,11 @@
         <div class="window-content">
             <h1 class="strict-title">PROFILE OVERVIEW</h1>
             <p class="panel-note">Operational profile summary with personal data and authored content.</p>
-            <p><a href="/web/profile/edit">Edit profile</a> | <a href="/web/profile/files">My files</a> | <a href="/web/dashboard">Dashboard</a></p>
+            <div class="panel-action-row">
+                <a class="btn" href="/web/profile/edit">Edit Profile</a>
+                <a class="btn" href="/web/profile/files">My Files</a>
+                <a class="btn" href="/web/posts?tab=drafts">My Drafts</a>
+            </div>
         </div>
     </header>
 
@@ -55,7 +59,7 @@
                 <div id="profile-table" class="table-grid">
                     <div class="row"><span class="cell label">Username</span><span class="cell" th:text="${viewProfile.username}">-</span></div>
                     <div class="row"><span class="cell label">Name</span><span class="cell" th:text="${viewProfile.name}">-</span></div>
-                    <!-- <div class="row"><span class="cell label">Email</span><span class="cell" th:text="${viewProfile.email}">-</span></div> -->
+                    <div class="row"><span class="cell label">Email</span><span class="cell" th:text="${viewProfile.email}">-</span></div>
                     <!-- <div class="row"><span class="cell label">Phone</span><span class="cell" th:text="${viewProfile.phoneNumber}">-</span></div> -->
                 </div>
             </div>

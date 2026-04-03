@@ -4,11 +4,8 @@ import com.github.rrin.vulyk.domain.entity.post.PostState;
 import com.github.rrin.vulyk.dto.post.PostRequest;
 import com.github.rrin.vulyk.dto.post.PostResponse;
 import com.github.rrin.vulyk.dto.post.PostStateRequest;
-import com.github.rrin.vulyk.exception.ValidationException;
 import com.github.rrin.vulyk.service.PostService;
 import jakarta.validation.Valid;
-import java.util.List;
-import java.util.Locale;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -45,24 +42,14 @@ public class PostController {
     @GetMapping
     public Page<PostResponse> list(
         @PageableDefault(size = 20) Pageable pageable,
-        @RequestParam(name = "state", required = false) List<String> stateFilters,
         @RequestParam(name = "q", required = false) String query
     ) {
-        List<PostState> states = stateFilters == null ? null : stateFilters.stream()
-            .map(s -> {
-                try {
-                    return PostState.valueOf(s.toUpperCase(Locale.ROOT));
-                } catch (IllegalArgumentException ex) {
-                    throw new ValidationException("Invalid post state: " + s);
-                }
-            })
-            .toList();
-        return postService.list(pageable, states, query);
+        return postService.listPublic(pageable, query);
     }
 
     @GetMapping("/{postId}")
-    public PostResponse get(@PathVariable Long postId) {
-        return postService.get(postId);
+    public PostResponse get(@PathVariable Long postId, @AuthenticationPrincipal String principalEmail) {
+        return postService.get(postId, principalEmail);
     }
 
     @PutMapping("/{postId}")

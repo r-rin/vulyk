@@ -178,6 +178,13 @@ body.retro-body {
     font-family: "Courier New", Courier, monospace;
 }
 
+.panel-action-row {
+    margin-top: 12px;
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
 .layout-grid {
     display: grid;
     gap: 12px;
@@ -534,12 +541,17 @@ a:focus-visible {
     border: 2px solid #808080;
 }
 
+.compact-table .row {
+    grid-template-columns: 100px 1fr;
+}
+
 .row {
     display: grid;
     grid-template-columns: 140px 1fr;
 }
 
 .cell {
+    word-break: break-word;
     padding: 8px;
     border-right: 2px solid #808080;
     border-bottom: 2px solid #808080;
@@ -791,6 +803,69 @@ a:focus-visible {
     font-weight: 700;
 }
 
+.market-hero {
+    display: grid;
+    gap: 16px;
+    align-items: start;
+}
+
+.market-hero-copy {
+    display: grid;
+    gap: 10px;
+}
+
+.market-description {
+    margin: 0;
+    padding: 12px;
+    border: 2px solid;
+    border-color: #808080 #fff #fff #808080;
+    box-shadow: var(--bevel-inset);
+    background: #f8f8f8;
+}
+
+.price-panel {
+    display: grid;
+    gap: 10px;
+    padding: 14px;
+    border: 2px solid;
+    border-color: #fff #808080 #808080 #fff;
+    box-shadow: var(--bevel-outset);
+    background: linear-gradient(180deg, #fff7c7 0%, #ffe88a 100%);
+}
+
+.price-kicker {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.price-display {
+    font-family: "Arial Black", Impact, Haettenschweiler, sans-serif;
+    font-size: clamp(2rem, 5vw, 3rem);
+    line-height: 1;
+}
+
+.seller-card {
+    display: grid;
+    gap: 12px;
+}
+
+.market-actions-stack {
+    display: grid;
+    gap: 10px;
+}
+
+.market-actions-stack form,
+.market-owner-grid form {
+    margin: 0;
+}
+
+.market-owner-grid {
+    display: grid;
+    gap: 16px;
+}
+
 .loading,
 .empty {
     border: 2px solid;
@@ -895,6 +970,15 @@ a:active {
 
     .workspace-layout.no-sidebar {
         grid-template-columns: 1fr;
+    }
+
+    .market-hero {
+        grid-template-columns: minmax(0, 1fr) 240px;
+    }
+
+    .market-owner-grid {
+        grid-template-columns: minmax(0, 1.4fr) minmax(220px, 0.8fr);
+        align-items: start;
     }
 }
 

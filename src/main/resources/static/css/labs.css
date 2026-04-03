@@ -6,65 +6,104 @@
     color: #f3f7fb;
 }
 
+/* Retro components from retro.css have light backgrounds — restore dark text */
+.lab-body .command-bar,
+.lab-body .command-link,
+.lab-body .window,
+.lab-body .window-content {
+    color: #000000;
+}
+
+/* Dark lab components — force all text to light regardless of inherited defaults */
+.lab-hero h1, .lab-hero h2, .lab-hero h3,
+.lab-card h2, .lab-card h3,
+.lab-card strong,
+.lab-task-row strong,
+.lab-hint-head strong,
+.lab-flag-form label,
+.lab-stat strong {
+    color: #f3f7fb;
+}
+
+.lab-body a.command-link {
+    color: #0000ff;
+}
+
+.lab-body a.command-link:hover {
+    color: #ff0000;
+}
+
 .lab-shell {
     width: min(1120px, 94vw);
-    margin: 14px auto 28px;
+    margin: 16px auto 40px;
     display: grid;
-    gap: 14px;
+    gap: 20px;
 }
+
+/* ── Hero ─────────────────────────────────── */
 
 .lab-hero {
     border: 2px solid #8ad4ff;
     background: linear-gradient(130deg, #142433 0%, #102b3b 70%, #0f2230 100%);
-    padding: 16px;
+    padding: 24px 28px;
     box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
 }
 
 .lab-kicker {
-    margin: 0;
-    font-size: 11px;
-    letter-spacing: 0.16em;
+    margin: 0 0 6px;
+    font-size: 12px;
+    letter-spacing: 0.18em;
     text-transform: uppercase;
     color: #f5cf75;
 }
 
 .lab-hero h1 {
-    margin: 8px 0;
-    font-size: clamp(1.4rem, 2.8vw, 2.2rem);
+    margin: 0 0 10px;
+    font-size: clamp(1.5rem, 3vw, 2.4rem);
+    line-height: 1.2;
 }
 
 .lab-hero p {
     margin: 0;
+    font-size: 1rem;
+    line-height: 1.6;
     color: #d5e7f3;
 }
 
+/* ── Summary stats ────────────────────────── */
+
 .lab-summary {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-    gap: 10px;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 12px;
 }
 
 .lab-stat {
     border: 1px solid #5ea4cc;
     background: #162938;
-    padding: 10px 12px;
+    padding: 14px 18px;
     display: grid;
-    gap: 4px;
+    gap: 6px;
 }
 
 .lab-stat span {
-    font-size: 12px;
+    font-size: 13px;
     color: #9fc7de;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
 }
 
 .lab-stat strong {
-    font-size: 20px;
+    font-size: 24px;
+    line-height: 1;
 }
+
+/* ── Lab card grid ────────────────────────── */
 
 .lab-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-    gap: 12px;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 16px;
 }
 
 .single-column-grid {
@@ -73,128 +112,165 @@
 
 .lab-card {
     border: 1px solid #446a83;
-    background: #142534;
-    padding: 12px;
+    background-color: #142534;
+    background-image:
+        url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='4' height='4'%3E%3Crect width='1' height='1' x='0' y='0' fill='rgba(255,255,255,0.03)'/%3E%3Crect width='1' height='1' x='2' y='2' fill='rgba(255,255,255,0.03)'/%3E%3C/svg%3E");
+    padding: 20px;
     display: grid;
-    gap: 8px;
+    gap: 12px;
 }
 
 .lab-card-head {
     display: flex;
     justify-content: space-between;
-    gap: 8px;
+    gap: 10px;
     align-items: start;
 }
 
 .lab-card h2 {
     margin: 0;
-    font-size: 1rem;
+    font-size: 1.1rem;
+    line-height: 1.3;
 }
+
+/* ── Status badge ─────────────────────────── */
 
 .lab-status {
     border: 1px solid #6c91a8;
-    padding: 2px 6px;
+    padding: 3px 8px;
     font-size: 11px;
     font-weight: 700;
+    letter-spacing: 0.05em;
     white-space: nowrap;
+    flex-shrink: 0;
 }
 
 .lab-status.is-active {
     background: #1f6f4f;
     border-color: #6cd69c;
+    color: #c6f0d8;
 }
 
 .lab-status.is-completed {
     background: #145d86;
     border-color: #8ad4ff;
+    color: #d4efff;
 }
 
 .lab-status.is-detected,
 .lab-status.is-discovered_by_flag {
     background: #5a3a87;
     border-color: #d2a8ff;
+    color: #eedcff;
 }
 
 .lab-status.is-locked_needs_flag {
     background: #68481d;
     border-color: #e8b76a;
+    color: #fde8bf;
 }
 
 .lab-status.is-inactive {
     background: #3a444d;
     border-color: #9aa9b6;
+    color: #d0d8de;
 }
+
+/* ── Card body text ───────────────────────── */
 
 .lab-category {
     margin: 0;
     font-size: 12px;
     color: #8dc1df;
     text-transform: uppercase;
-    letter-spacing: 0.08em;
+    letter-spacing: 0.1em;
 }
 
 .lab-description {
     margin: 0;
+    font-size: 0.95rem;
+    line-height: 1.6;
     color: #e7f0f6;
 }
 
 .lab-points {
     margin: 0;
+    font-size: 0.95rem;
+    color: #c9dde8;
 }
+
+.lab-points strong {
+    color: #f5cf75;
+}
+
+/* ── Flag form ────────────────────────────── */
 
 .lab-flag-form {
     display: grid;
-    gap: 6px;
+    gap: 8px;
     margin-top: 4px;
 }
 
 .lab-flag-form label {
     display: grid;
-    gap: 4px;
-    font-size: 12px;
+    gap: 5px;
+    font-size: 13px;
 }
 
 .lab-flag-form input {
     width: 100%;
 }
 
+/* ── Task list ────────────────────────────── */
+
 .lab-task-list {
     display: grid;
-    gap: 8px;
+    gap: 10px;
 }
 
 .lab-task-row {
     display: grid;
     grid-template-columns: 1fr auto;
-    gap: 12px;
+    gap: 16px;
+    align-items: start;
     border: 1px solid #36576a;
     background: #10212d;
-    padding: 10px;
+    padding: 14px;
+}
+
+.lab-task-row strong {
+    font-size: 0.95rem;
 }
 
 .lab-task-row p {
     margin: 6px 0 0;
+    font-size: 0.9rem;
+    line-height: 1.55;
     color: #c7d9e4;
 }
 
 .lab-task-points {
     font-weight: 700;
+    font-size: 0.95rem;
     color: #f5cf75;
     white-space: nowrap;
+    padding-top: 2px;
 }
+
+/* ── Hint list ────────────────────────────── */
 
 .lab-hint-list {
     display: grid;
-    gap: 8px;
+    gap: 10px;
     margin-top: 10px;
 }
 
 .lab-hint-card {
     border: 1px solid #4f6778;
     background: #0d1b25;
-    padding: 10px;
+    padding: 14px;
     display: grid;
-    gap: 8px;
+    gap: 10px;
 }
 
 .lab-hint-head {
@@ -206,18 +282,22 @@
 
 .lab-hint-head span {
     color: #f5cf75;
-    font-size: 12px;
+    font-size: 13px;
     font-weight: 700;
 }
 
 .lab-hint-card p {
     margin: 0;
+    font-size: 0.95rem;
+    line-height: 1.6;
     color: #d8e5ee;
 }
 
 .lab-hint-card form {
     margin: 0;
 }
+
+/* ── Search form ──────────────────────────── */
 
 .lab-search-form {
     display: grid;

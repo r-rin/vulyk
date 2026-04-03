@@ -25,13 +25,13 @@ public class ReactionService {
     private final ReactionRepository reactionRepository;
     private final PostRepository postRepository;
     private final CommentRepository commentRepository;
+    private final PostService postService;
     private final UserRepository userRepository;
 
     @Transactional
     public ReactionStatusResponse likePost(Long postId, String principalEmail) {
         UserEntity user = requireUser(principalEmail);
-        PostEntity post = postRepository.findById(postId)
-            .orElseThrow(() -> new NotFoundException("Post not found"));
+        PostEntity post = postService.requireViewablePostEntity(postId, principalEmail);
 
         reactionRepository.findByUserIdAndPostId(user.getId(), postId)
             .orElseGet(() -> reactionRepository.save(ReactionEntity.builder()
@@ -46,8 +46,7 @@ public class ReactionService {
     @Transactional
     public ReactionStatusResponse unlikePost(Long postId, String principalEmail) {
         UserEntity user = requireUser(principalEmail);
-        postRepository.findById(postId)
-            .orElseThrow(() -> new NotFoundException("Post not found"));
+        postService.requireViewablePostEntity(postId, principalEmail);
 
         reactionRepository.findByUserIdAndPostId(user.getId(), postId)
             .ifPresent(reactionRepository::delete);
@@ -59,8 +58,7 @@ public class ReactionService {
     @Transactional(readOnly = true)
     public ReactionStatusResponse postStatus(Long postId, String principalEmail) {
         UserEntity user = requireUser(principalEmail);
-        postRepository.findById(postId)
-            .orElseThrow(() -> new NotFoundException("Post not found"));
+        postService.requireViewablePostEntity(postId, principalEmail);
 
         boolean liked = reactionRepository.existsByUserIdAndPostId(user.getId(), postId);
         long count = reactionRepository.countByPostId(postId);
@@ -72,6 +70,7 @@ public class ReactionService {
         UserEntity user = requireUser(principalEmail);
         CommentEntity comment = commentRepository.findById(commentId)
             .orElseThrow(() -> new NotFoundException("Comment not found"));
+        requireVisibleCommentTarget(comment, principalEmail);
 
         reactionRepository.findByUserIdAndCommentId(user.getId(), commentId)
             .orElseGet(() -> reactionRepository.save(ReactionEntity.builder()
@@ -86,8 +85,9 @@ public class ReactionService {
     @Transactional
     public ReactionStatusResponse unlikeComment(Long commentId, String principalEmail) {
         UserEntity user = requireUser(principalEmail);
-        commentRepository.findById(commentId)
+        CommentEntity comment = commentRepository.findById(commentId)
             .orElseThrow(() -> new NotFoundException("Comment not found"));
+        requireVisibleCommentTarget(comment, principalEmail);
 
         reactionRepository.findByUserIdAndCommentId(user.getId(), commentId)
             .ifPresent(reactionRepository::delete);
@@ -99,8 +99,9 @@ public class ReactionService {
     @Transactional(readOnly = true)
     public ReactionStatusResponse commentStatus(Long commentId, String principalEmail) {
         UserEntity user = requireUser(principalEmail);
-        commentRepository.findById(commentId)
+        CommentEntity comment = commentRepository.findById(commentId)
             .orElseThrow(() -> new NotFoundException("Comment not found"));
+        requireVisibleCommentTarget(comment, principalEmail);
 
         boolean liked = reactionRepository.existsByUserIdAndCommentId(user.getId(), commentId);
         long count = reactionRepository.countByCommentId(commentId);
@@ -124,6 +125,13 @@ public class ReactionService {
     private UserEntity requireUser(String email) {
         return userRepository.findByEmail(email)
             .orElseThrow(() -> new ValidationException("User not found"));
+    }
+
+    private void requireVisibleCommentTarget(CommentEntity comment, String principalEmail) {
+        if (comment.getPost() == null || comment.getPost().getId() == null) {
+            throw new NotFoundException("Comment not found");
+        }
+        postService.requireViewablePostEntity(comment.getPost().getId(), principalEmail);
     }
 
     private ReactionItemResponse toPostItem(ReactionEntity reaction) {

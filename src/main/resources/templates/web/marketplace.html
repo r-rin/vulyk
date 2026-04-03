@@ -35,6 +35,9 @@
         <div class="window-content">
             <h1 class="strict-title">MARKETPLACE</h1>
             <p class="panel-note">Publish offers, filter inventory, and execute seller-contact workflows.</p>
+            <div class="panel-action-row" th:if="${isAuthenticated}">
+                <a class="btn btn-success" href="/web/marketplace/create">Create Item</a>
+            </div>
         </div>
     </header>
 
@@ -45,23 +48,6 @@
 
     <div class="workspace-layout no-sidebar">
         <div class="workspace-main">
-            <section class="window accent-green">
-                <div class="window-title">CREATE ITEM</div>
-                <div class="window-content">
-                    <form id="market-create-form" class="retro-form" method="post" action="/web/marketplace">
-                        <label for="item-title">Title</label>
-                        <input id="item-title" name="title" maxlength="100" required>
-                        <label for="item-category">Category</label>
-                        <input id="item-category" name="category" maxlength="60">
-                        <label for="item-price">Price</label>
-                        <input id="item-price" name="price" type="number" min="0.01" step="0.01" required>
-                        <label for="item-description">Description</label>
-                        <textarea id="item-description" name="description" maxlength="2000" required></textarea>
-                        <button type="submit" class="btn btn-success">CREATE ITEM</button>
-                    </form>
-                </div>
-            </section>
-
             <section class="window accent-yellow">
                 <div class="window-title">BROWSE ITEMS</div>
                 <div class="window-content">
@@ -107,7 +93,6 @@
                             </p>
                             <p th:text="${item.description}">description</p>
                             <p class="price" th:text="'Price: ' + ${item.price}">Price</p>
-                            <a class="btn" th:href="@{/web/marketplace/{id}(id=${item.id})}">OPEN PAGE</a>
                         </article>
                     </div>
                     <p id="market-empty" class="empty" th:if="${itemsPage.content.isEmpty()}">No items found.</p>

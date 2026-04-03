@@ -246,6 +246,30 @@ public class MarketplaceService {
         return new PageImpl<>(items, pageable, favorites.getTotalElements());
     }
 
+    @Transactional(readOnly = true)
+    public Page<MarketplaceItemResponse> listBySellerUsername(
+        String username,
+        Pageable pageable,
+        String principalEmail
+    ) {
+        UserEntity seller = userRepository.findByUsername(username)
+            .orElseThrow(() -> new NotFoundException("User not found"));
+
+        boolean ownView = principalEmail != null
+            && seller.getEmail() != null
+            && seller.getEmail().equalsIgnoreCase(principalEmail);
+
+        Page<MarketplaceItemEntity> items = ownView
+            ? marketplaceItemRepository.findAllBySellerId(seller.getId(), pageable)
+            : marketplaceItemRepository.findAllBySellerIdAndStatus(
+                seller.getId(),
+                MarketplaceItemStatus.AVAILABLE,
+                pageable
+            );
+
+        return items.map(this::toResponse);
+    }
+
     private void requireOwnership(MarketplaceItemEntity item, String principalEmail) {
         if (item.getSeller() == null || !item.getSeller().getEmail().equalsIgnoreCase(principalEmail)) {
             throw new ValidationException("Only the seller can modify this marketplace item");

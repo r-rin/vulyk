@@ -45,6 +45,7 @@ public class SecurityConfig {
                     "/web/marketplace/*",
                     "/web/posts",
                     "/web/posts/*",
+                    "/web/person/*",
                     "/web/login",
                     "/web/register",
                     "/web/logout",

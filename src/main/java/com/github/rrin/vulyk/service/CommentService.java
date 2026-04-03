@@ -23,12 +23,12 @@ public class CommentService {
 
     private final CommentRepository commentRepository;
     private final PostRepository postRepository;
+    private final PostService postService;
     private final UserRepository userRepository;
 
     @Transactional
     public CommentResponse create(Long postId, String principalEmail, CommentRequest request) {
-        PostEntity post = postRepository.findById(postId)
-            .orElseThrow(() -> new NotFoundException("Post not found"));
+        PostEntity post = postService.requireViewablePostEntity(postId, principalEmail);
         UserEntity author = requireUser(principalEmail);
 
         CommentEntity parent = null;
@@ -52,7 +52,9 @@ public class CommentService {
     }
 
     @Transactional(readOnly = true)
-    public Page<CommentResponse> listForPost(Long postId, Long parentCommentId, Pageable pageable) {
+    public Page<CommentResponse> listForPost(Long postId, String principalEmail, Long parentCommentId, Pageable pageable) {
+        postService.requireViewablePostEntity(postId, principalEmail);
+
         if (parentCommentId != null) {
             CommentEntity parent = commentRepository.findById(parentCommentId)
                 .orElseThrow(() -> new NotFoundException("Parent comment not found"));

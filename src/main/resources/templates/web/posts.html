@@ -33,48 +33,32 @@
         <div class="window-title">POST MANAGEMENT</div>
         <div class="window-content">
             <h1 class="strict-title">POSTS</h1>
-            <p class="panel-note">Create content and inspect filtered feed output in separate sections.</p>
+            <p class="panel-note">Public feed for visible posts, with a separate draft folder for your unpublished work.</p>
+            <div class="panel-action-row" th:if="${isAuthenticated}">
+                <a class="btn btn-primary" href="/web/posts/create">Create Post</a>
+                <a class="btn" href="/web/posts?tab=drafts">My Drafts</a>
+            </div>
         </div>
     </header>
 
     <div class="folder-tabs" aria-label="Content folders">
-        <a class="folder-tab is-active" href="/web/posts">Posts</a>
+        <a class="folder-tab" th:classappend="${activePostsTab == 'feed'} ? ' is-active' : ''" href="/web/posts">Post Feed</a>
         <a class="folder-tab" href="/web/marketplace">Marketplace</a>
     </div>
 
     <div class="workspace-layout no-sidebar">
         <div class="workspace-main">
-            <section class="window accent-green">
-                <div class="window-title">CREATE POST</div>
-                <div class="window-content">
-                    <form id="post-create-form" class="retro-form" method="post" action="/web/posts">
-                        <label for="post-title">Title</label>
-                        <input id="post-title" name="title" maxlength="100" required>
-                        <label for="post-content">Content</label>
-                        <textarea id="post-content" name="content" maxlength="1000" required></textarea>
-                        <button type="submit" class="btn btn-primary">CREATE POST</button>
-                    </form>
-                </div>
-            </section>
-
             <section class="window accent-yellow">
-                <div class="window-title">BROWSE POSTS</div>
+                <div class="window-title" th:text="${activePostsTab == 'drafts'} ? 'DRAFT FOLDER' : 'POST FEED'">BROWSE POSTS</div>
                 <div class="window-content">
                     <form id="post-filter-form" class="retro-form compact-form" method="get" action="/web/posts">
+                        <input type="hidden" name="tab" th:value="${activePostsTab}">
                         <label for="post-q">Search</label>
                         <input id="post-q" name="q" maxlength="120" th:value="${query}">
-                        <label for="post-state">State</label>
-                        <select id="post-state" name="state">
-                            <option value="" th:selected="${state == ''}">DEFAULT</option>
-                            <option value="PUBLISHED" th:selected="${state == 'PUBLISHED'}">PUBLISHED</option>
-                            <option value="DRAFT" th:selected="${state == 'DRAFT'}">DRAFT</option>
-                            <option value="HIDDEN" th:selected="${state == 'HIDDEN'}">HIDDEN</option>
-                            <option value="REDACTED" th:selected="${state == 'REDACTED'}">REDACTED</option>
-                        </select>
                         <button type="submit" class="btn">SEARCH</button>
                     </form>
                     <div id="posts-list" class="feed"
-                         th:attr="data-next-page=${postsPage.number + 1},data-last=${postsPage.last},data-query=${query},data-state=${state}">
+                         th:attr="data-next-page=${postsPage.number + 1},data-last=${postsPage.last},data-query=${query},data-tab=${activePostsTab}">
                         <article class="post-card" th:each="post : ${postsPage.content}">
                             <h3><a th:href="@{/web/posts/{id}(id=${post.id})}" th:text="${post.title}">title</a></h3>
                             <p class="meta">
@@ -82,11 +66,16 @@
                                 <span th:text="${post.state}">state</span>
                             </p>
                             <p th:text="${post.content}">content</p>
-                            <a class="btn" th:href="@{/web/posts/{id}(id=${post.id})}">OPEN PAGE</a>
                         </article>
                     </div>
                     <p id="posts-empty" class="empty" th:if="${postsPage.content.isEmpty()}">No posts found.</p>
-                    <div id="posts-scroll-sentinel" class="loading scroll-sentinel" th:if="${!postsPage.last}">Loading more posts...</div>
+                    <div class="post-actions" th:if="${postsPage.totalPages > 1}">
+                        <a class="btn" th:if="${!postsPage.first}"
+                           th:href="@{/web/posts(page=${postsPage.number - 1},q=${query},tab=${activePostsTab})}">Previous</a>
+                        <span>Page <strong th:text="${postsPage.number + 1}">1</strong> / <strong th:text="${postsPage.totalPages}">1</strong></span>
+                        <a class="btn" th:if="${!postsPage.last}"
+                           th:href="@{/web/posts(page=${postsPage.number + 1},q=${query},tab=${activePostsTab})}">Next</a>
+                    </div>
                 </div>
             </section>
         </div>

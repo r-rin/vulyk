@@ -170,19 +170,16 @@ export const Render = {
                     Utils.escapeHtml(comment.id) +
                     '">0</span></button><button class="btn" type="button" data-action="toggle-reply" data-comment-id="' +
                     Utils.escapeHtml(comment.id) +
-                    '">REPLY</button>' +
-                    (own
-                        ? '<button class="btn btn-danger" type="button" data-action="delete-comment" data-comment-id="' +
-                          Utils.escapeHtml(comment.id) +
-                          '">DELETE</button>'
-                        : "") +
+                                        '">REPLY</button>' +
                     "</div>" +
                     (own
                                                 ? '<form class="inline-form" data-action="edit-comment" data-comment-id="' +
                           Utils.escapeHtml(comment.id) +
                           '" hidden><textarea name="content" maxlength="2000" required>' +
                           Utils.escapeHtml(comment.content || "") +
-                          '</textarea><button class="btn" type="submit">SAVE COMMENT</button></form>'
+                                                    '</textarea><div class="mini-actions"><button class="btn" type="submit">SAVE COMMENT</button><button class="btn btn-danger" type="button" data-action="delete-comment" data-comment-id="' +
+                                                    Utils.escapeHtml(comment.id) +
+                                                    '">DELETE</button></div></form>'
                         : "") +
                     '<form class="inline-form" data-action="reply-comment" data-post-id="' +
                     Utils.escapeHtml(postId) +

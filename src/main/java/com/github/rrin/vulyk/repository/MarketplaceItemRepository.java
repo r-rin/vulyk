@@ -16,6 +16,8 @@ public interface MarketplaceItemRepository extends JpaRepository<MarketplaceItem
 
     Page<MarketplaceItemEntity> findAllBySellerId(Long sellerId, Pageable pageable);
 
+    Page<MarketplaceItemEntity> findAllBySellerIdAndStatus(Long sellerId, MarketplaceItemStatus status, Pageable pageable);
+
     Page<MarketplaceItemEntity> findAllByStatus(MarketplaceItemStatus status, Pageable pageable);
 
     Page<MarketplaceItemEntity> findAllByStatusAndPriceBetween(

@@ -1,5 +1,6 @@
 package com.github.rrin.vulyk.dto.post;
 
+import com.github.rrin.vulyk.domain.entity.post.PostState;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
@@ -20,4 +21,6 @@ public class PostRequest {
     @NotBlank
     @Size(max = 1000)
     private String content;
+
+    private PostState state;
 }
