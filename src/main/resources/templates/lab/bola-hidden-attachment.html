@@ -52,13 +52,6 @@
                 <span class="lab-status" th:classappend="' is-' + ${#strings.toLowerCase(labProgress.status.name())}" th:text="${labProgress.status}">ACTIVE</span>
             </div>
 
-            <div class="window">
-                <div class="window-title">Vulnerable Endpoint</div>
-                <div class="window-content">
-                    <p><strong>GET</strong> /files/{id}</p>
-                </div>
-            </div>
-
             <div class="lab-task-list">
                 <div class="lab-task-row" th:each="task : ${labProgress.tasks}">
                     <div>

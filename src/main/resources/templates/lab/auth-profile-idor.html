@@ -56,15 +56,6 @@
                 In vulnerable mode, profile update can be addressed by username in the request path and fails to enforce ownership.
             </p>
 
-            <div class="window">
-                <div class="window-title">Vulnerable Endpoint</div>
-                <div class="window-content">
-                    <p><strong>Method:</strong> PUT</p>
-                    <p><strong>Path:</strong> /users/profile/{username}</p>
-                    <p><strong>Body:</strong> standard UpdateProfileRequest JSON</p>
-                </div>
-            </div>
-
             <div class="lab-task-list">
                 <div class="lab-task-row" th:each="task : ${labProgress.tasks}">
                     <div>

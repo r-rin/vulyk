@@ -56,15 +56,6 @@
                 This lab enables a vulnerable profile-image viewing endpoint that resolves filesystem paths from user input.
             </p>
 
-            <div class="window">
-                <div class="window-title">Vulnerable Endpoint</div>
-                <div class="window-content">
-                    <p><strong>Method:</strong> GET</p>
-                    <p><strong>Path:</strong> /files/profile-images/view?name=...</p>
-                    <p><strong>Goal:</strong> Traverse out of profile image storage and read a hidden internal file.</p>
-                </div>
-            </div>
-
             <div class="lab-task-list">
                 <div class="lab-task-row" th:each="task : ${labProgress.tasks}">
                     <div>
