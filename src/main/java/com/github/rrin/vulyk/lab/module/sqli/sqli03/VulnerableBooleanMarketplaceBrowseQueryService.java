@@ -24,8 +24,6 @@ import org.springframework.stereotype.Service;
 @ConditionalOnLabEnabled(SqlInjectionBooleanMarketplaceLab.LAB_ID)
 public class VulnerableBooleanMarketplaceBrowseQueryService implements MarketplaceBrowseQueryService {
 
-    private static final String ORACLE_SENTINEL = "sqli03-sentinel-";
-
     private final MarketplaceItemRepository marketplaceItemRepository;
     private final SecureMarketplaceBrowseQueryService secureMarketplaceBrowseQueryService;
 
