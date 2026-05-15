@@ -7,7 +7,7 @@
     <link rel="stylesheet" href="/css/retro.css">
     <script type="module" src="/js/app.js"></script>
 </head>
-<body class="retro-body" data-page="profile-edit">
+<body class="retro-body" th:attr="data-page=${profileEditPageKey}">
 <div class="page-shell strict-shell narrow-shell">
     <nav class="command-bar" aria-label="Global command bar">
         <div class="command-links">
@@ -33,7 +33,7 @@
         <div class="window-content">
             <h1 class="strict-title">EDIT PROFILE</h1>
             <p class="panel-note">Update identity fields and manage profile picture in separate operations.</p>
-            <form id="profile-edit-form" class="retro-form" method="post" action="/web/profile/edit">
+            <form id="profile-edit-form" class="retro-form" method="post" th:action="${profileEditAction}">
                 <label for="edit-username">Username</label>
                 <input id="edit-username" name="username" maxlength="60" th:value="${viewProfile.username}">
                 <label for="edit-email">Email</label>

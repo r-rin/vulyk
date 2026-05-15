@@ -1,4 +1,4 @@
-package com.github.rrin.vulyk.lab.module.sqli;
+package com.github.rrin.vulyk.lab.module.sqli.sqli03;
 
 import com.github.rrin.vulyk.lab.config.ConditionalOnLabEnabled;
 import com.github.rrin.vulyk.lab.domain.LabDefinition;
@@ -9,11 +9,11 @@ import java.util.List;
 import org.springframework.stereotype.Component;
 
 @Component
-@ConditionalOnLabEnabled(SqlInjectionMarketplaceLab.LAB_ID)
-public class SqlInjectionMarketplaceLab implements LabDefinition {
+@ConditionalOnLabEnabled(SqlInjectionBooleanMarketplaceLab.LAB_ID)
+public class SqlInjectionBooleanMarketplaceLab implements LabDefinition {
 
-    public static final String LAB_ID = "SQLI-01";
-    public static final String TASK_ID = "extract-ledger-flag";
+    public static final String LAB_ID = "SQLI-03";
+    public static final String TASK_ID = "extract-hidden-title-flag";
 
     @Override
     public String getId() {
@@ -22,7 +22,7 @@ public class SqlInjectionMarketplaceLab implements LabDefinition {
 
     @Override
     public String getTitle() {
-        return "Marketplace Search Injection";
+        return "Boolean Marketplace Oracle";
     }
 
     @Override
@@ -32,7 +32,7 @@ public class SqlInjectionMarketplaceLab implements LabDefinition {
 
     @Override
     public String getDescription() {
-        return "Exploit the public marketplace search to retrieve an internal removed record and recover the training flag.";
+        return "Use boolean-based blind SQL injection on marketplace search to infer a hidden removed item title and recover the training flag.";
     }
 
     @Override
@@ -44,22 +44,22 @@ public class SqlInjectionMarketplaceLab implements LabDefinition {
     public List<LabTaskDefinition> getTasks() {
         return List.of(new LabTaskDefinition(
             TASK_ID,
-            "Recover the admin ledger flag",
-            "Use the public search box to surface the hidden recovery ledger entry and submit the flag it contains.",
+            "Extract the hidden title flag",
+            "Use boolean predicates in the marketplace search query to infer the hidden removed item title and submit the flag.",
             100,
             LabTaskMode.FLAG_SUBMISSION,
             List.of(
                 new LabTaskHintDefinition(
-                    "catalog-filter",
+                    "hidden-title",
                     "Hint 1",
-                    "The normal search only returns rows marked AVAILABLE. Focus on how the SQL predicate is assembled rather than on the visible results themselves.",
+                    "The secret is in a hidden item's title. Escape out of the quoted search pattern, then inject a boolean probe like substring(lower(mi.title), 1, 1) = 'f'.",
                     15
                 ),
                 new LabTaskHintDefinition(
-                    "removed-ledger",
+                    "flag-shape",
                     "Hint 2",
-                    "The flag is embedded in the description of an item that was intentionally removed from the public catalog.",
-                    25
+                    "The extracted value uses the standard training format: flag{...}.",
+                    20
                 )
             )
         ));

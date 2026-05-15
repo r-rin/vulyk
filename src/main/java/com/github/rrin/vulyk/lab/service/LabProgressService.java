@@ -127,6 +127,32 @@ public class LabProgressService {
     }
 
     @Transactional
+    public void completeStateTask(String labId, String taskId, String evidence) {
+        LabDefinition labDefinition = requireActiveLab(labId);
+        ensureProgressRows(labDefinition);
+
+        LabTaskDefinition taskDefinition = requireTask(labDefinition, taskId);
+        if (taskDefinition.mode() != LabTaskMode.STATE_TRACKED) {
+            throw new ValidationException("Task is not configured for state-tracked completion");
+        }
+
+        LabTaskProgressEntity progress = labTaskProgressRepository.findByLabIdAndTaskId(labDefinition.getId(), taskDefinition.id())
+            .orElseThrow(() -> new ValidationException("Task progress was not initialized"));
+
+        if (progress.getStatus() == LabTaskProgressStatus.COMPLETED) {
+            return;
+        }
+
+        int awardedPoints = calculateMaxPointsAvailable(labDefinition.getId(), taskDefinition);
+
+        progress.setStatus(LabTaskProgressStatus.COMPLETED);
+        progress.setPointsAwarded(awardedPoints);
+        progress.setCompletedAt(Instant.now());
+        progress.setEvidence("state-tracked:" + normalizeEvidence(evidence));
+        labTaskProgressRepository.save(progress);
+    }
+
+    @Transactional
     public void ensureProgressRows(LabDefinition labDefinition) {
         Map<String, LabTaskProgressEntity> existingByTask = labTaskProgressRepository.findAllByLabId(labDefinition.getId())
             .stream()
@@ -284,5 +310,18 @@ public class LabProgressService {
             throw new ValidationException("Flag value is required");
         }
         return flagValue.trim();
+    }
+
+    private String normalizeEvidence(String evidence) {
+        if (evidence == null || evidence.isBlank()) {
+            return "no-evidence";
+        }
+
+        String normalized = evidence.trim();
+        if (normalized.length() <= 200) {
+            return normalized;
+        }
+
+        return normalized.substring(0, 200);
     }
 }

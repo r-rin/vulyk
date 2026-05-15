@@ -1,4 +1,4 @@
-package com.github.rrin.vulyk.lab.module.sqli;
+package com.github.rrin.vulyk.lab.module.sqli.sqli03;
 
 import com.github.rrin.vulyk.domain.entity.marketplace.MarketplaceItemEntity;
 import com.github.rrin.vulyk.domain.entity.marketplace.MarketplaceItemStatus;
@@ -17,16 +17,20 @@ import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 @Component
 @RequiredArgsConstructor
-@ConditionalOnLabEnabled(SqlInjectionMarketplaceLab.LAB_ID)
-public class SqlInjectionMarketplaceLabSeeder implements ApplicationRunner {
+@ConditionalOnLabEnabled(SqlInjectionBooleanMarketplaceLab.LAB_ID)
+public class SqlInjectionBooleanMarketplaceLabSeeder implements ApplicationRunner {
 
-    private final SqlInjectionMarketplaceLab labDefinition;
+    public static final String TARGET_MARKER = "sqli03-title-oracle";
+    public static final String TARGET_SELLER_USERNAME = "oracle-catalog";
+
+    private final SqlInjectionBooleanMarketplaceLab labDefinition;
     private final LabProperties labProperties;
     private final LabFlagRepository labFlagRepository;
     private final LabFlagVerificationService labFlagVerificationService;
@@ -41,49 +45,41 @@ public class SqlInjectionMarketplaceLabSeeder implements ApplicationRunner {
         labProgressService.ensureProgressRows(labDefinition);
 
         UserEntity seller = ensureSeller(
-            "lab-archivist",
-            "archivist@vulyk.lab",
-            "Archive Custodian",
-            "Maintains item restoration records and internal recovery notes."
+            TARGET_SELLER_USERNAME,
+            "oracle-catalog@vulyk.lab",
+            "Oracle Catalog Keeper",
+            "Maintains hidden marketplace incident records for training drills."
         );
 
         UserEntity trader = ensureSeller(
-            "field-trader",
-            "trader@vulyk.lab",
-            "Field Trader",
-            "Runs the public offers board for equipment and surplus parts."
+            "market-runner",
+            "market-runner@vulyk.lab",
+            "Market Runner",
+            "Publishes normal public listings."
         );
 
         String visibleFlag = ensureFlagValue(seller);
 
         ensureItem(
-            seller,
-            "Workbench Lamp",
-            "Stable task lighting with a grounded steel arm and spare bulb included.",
-            "equipment",
-            new BigDecimal("49.90"),
-            MarketplaceItemStatus.AVAILABLE
-        );
-        ensureItem(
             trader,
-            "Courier Satchel",
-            "Canvas dispatch satchel with reinforced stitching and brass buckle.",
-            "logistics",
-            new BigDecimal("24.50"),
-            MarketplaceItemStatus.AVAILABLE
-        );
-        ensureItem(
-            trader,
-            "Retro Terminal Keyboard",
-            "Mechanical terminal keyboard sourced from a decommissioned operations desk.",
+            "Copper Wire Pack",
+            "Public stock with sealed packaging.",
             "electronics",
-            new BigDecimal("89.00"),
+            new BigDecimal("14.99"),
+            MarketplaceItemStatus.AVAILABLE
+        );
+        ensureItem(
+            trader,
+            "Field Notebook",
+            "Weather-resistant pages and rigid cover.",
+            "logistics",
+            new BigDecimal("8.20"),
             MarketplaceItemStatus.AVAILABLE
         );
         ensureItem(
             seller,
-            "Admin Recovery Ledger",
-            "Internal recovery notes. Training flag: " + visibleFlag,
+            visibleFlag,
+            TARGET_MARKER,
             "internal",
             new BigDecimal("0.01"),
             MarketplaceItemStatus.REMOVED
@@ -103,15 +99,15 @@ public class SqlInjectionMarketplaceLabSeeder implements ApplicationRunner {
     }
 
     private String ensureFlagValue(UserEntity seller) {
-        return labFlagRepository.findByLabIdAndTaskId(labDefinition.getId(), SqlInjectionMarketplaceLab.TASK_ID)
+        return labFlagRepository.findByLabIdAndTaskId(labDefinition.getId(), SqlInjectionBooleanMarketplaceLab.TASK_ID)
             .map(existing -> upgradeAndResolveFlagValue(existing, seller))
             .orElseGet(() -> {
                 String rawFlag = generateFlag();
                 labFlagRepository.save(LabFlagEntity.builder()
                     .labId(labDefinition.getId())
-                    .taskId(SqlInjectionMarketplaceLab.TASK_ID)
+                    .taskId(SqlInjectionBooleanMarketplaceLab.TASK_ID)
                     .flagHash(labFlagVerificationService.encode(rawFlag))
-                    .seedContext("marketplace_items.description")
+                    .seedContext("marketplace_items.title")
                     .build());
                 return rawFlag;
             });
@@ -125,10 +121,12 @@ public class SqlInjectionMarketplaceLabSeeder implements ApplicationRunner {
             return storedValue;
         }
 
-        return marketplaceItemRepository.findBySellerIdAndTitleIgnoreCase(seller.getId(), "Admin Recovery Ledger")
-            .map(MarketplaceItemEntity::getDescription)
-            .map(this::extractFlagValue)
-            .orElseThrow(() -> new IllegalStateException("Unable to recover seeded flag value for SQLI-01"));
+        return marketplaceItemRepository.findAllBySellerId(seller.getId(), Pageable.unpaged())
+            .stream()
+            .filter(item -> TARGET_MARKER.equals(item.getDescription()))
+            .map(MarketplaceItemEntity::getTitle)
+            .findFirst()
+            .orElseThrow(() -> new IllegalStateException("Unable to recover seeded flag value for SQLI-03"));
     }
 
     private void ensureItem(
@@ -154,18 +152,8 @@ public class SqlInjectionMarketplaceLabSeeder implements ApplicationRunner {
 
     private String generateFlag() {
         return labProperties.getValidation().getFlagPrefix()
-            + "sqli-marketplace-"
+            + "sqli-03-"
             + UUID.randomUUID().toString().substring(0, 12)
             + labProperties.getValidation().getFlagSuffix();
-    }
-
-    private String extractFlagValue(String description) {
-        String marker = "Training flag: ";
-        int markerIndex = description == null ? -1 : description.indexOf(marker);
-        if (markerIndex < 0) {
-            throw new IllegalStateException("Seeded marketplace item no longer contains a recoverable flag value");
-        }
-
-        return description.substring(markerIndex + marker.length()).trim();
     }
 }

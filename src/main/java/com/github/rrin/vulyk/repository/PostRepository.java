@@ -43,5 +43,7 @@ public interface PostRepository extends JpaRepository<PostEntity, Long> {
 
     Optional<PostEntity> findByIdAndAuthorId(Long id, Long authorId);
 
+    Optional<PostEntity> findByAuthorIdAndTitleIgnoreCase(Long authorId, String title);
+
     boolean existsByIdAndAuthorId(Long id, Long authorId);
 }

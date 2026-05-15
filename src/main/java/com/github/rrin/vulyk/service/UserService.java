@@ -5,6 +5,7 @@ import com.github.rrin.vulyk.domain.entity.user.UserRole;
 import com.github.rrin.vulyk.exception.InvalidCredentials;
 import com.github.rrin.vulyk.exception.ValidationException;
 import com.github.rrin.vulyk.repository.UserRepository;
+import com.github.rrin.vulyk.service.auth.api.LoginAuthenticationService;
 import com.github.rrin.vulyk.security.JwtTokenProvider;
 import com.github.rrin.vulyk.dto.auth.AuthResponse;
 import com.github.rrin.vulyk.dto.auth.LoginRequest;
@@ -13,9 +14,6 @@ import com.github.rrin.vulyk.dto.user.UpdateProfileRequest;
 import com.github.rrin.vulyk.dto.user.UserProfileResponse;
 import java.util.Locale;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -27,7 +25,7 @@ public class UserService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtTokenProvider tokenProvider;
-    private final AuthenticationManager authenticationManager;
+    private final LoginAuthenticationService loginAuthenticationService;
 
     @Transactional
     public AuthResponse register(RegisterRequest request) {
@@ -57,14 +55,7 @@ public class UserService {
     }
 
     public AuthResponse login(LoginRequest request) {
-        Authentication authentication = new UsernamePasswordAuthenticationToken(
-            request.getIdentifier(),
-            request.getPassword()
-        );
-        authenticationManager.authenticate(authentication);
-
-        UserEntity user = userRepository.findByEmailOrUsername(request.getIdentifier())
-            .orElseThrow(() -> new InvalidCredentials("Invalid email or password"));
+        UserEntity user = loginAuthenticationService.authenticate(request);
 
         String token = tokenProvider.generateToken(user.getEmail(), user.getRole().name());
         return new AuthResponse(token);

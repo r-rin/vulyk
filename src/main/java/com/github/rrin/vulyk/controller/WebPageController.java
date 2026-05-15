@@ -20,6 +20,8 @@ import com.github.rrin.vulyk.service.MarketplaceService;
 import com.github.rrin.vulyk.service.PostService;
 import com.github.rrin.vulyk.service.ReactionService;
 import com.github.rrin.vulyk.service.UserService;
+import com.github.rrin.vulyk.service.file.api.ProfileImageUrlResolver;
+import com.github.rrin.vulyk.service.profile.api.ProfileEditFormResolver;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import java.math.BigDecimal;
@@ -53,6 +55,8 @@ public class WebPageController {
     private final ReactionService reactionService;
     private final MarketplaceService marketplaceService;
     private final FileService fileService;
+    private final ProfileImageUrlResolver profileImageUrlResolver;
+    private final ProfileEditFormResolver profileEditFormResolver;
 
     @GetMapping({"/", "/app", "/dashboard", "/index", "/home"})
     public String rootAlias() {
@@ -257,7 +261,10 @@ public class WebPageController {
         }
 
         addAuthModel(principalEmail, model);
-        model.addAttribute("viewProfile", userService.getProfile(principalEmail));
+        UserProfileResponse viewProfile = userService.getProfile(principalEmail);
+        model.addAttribute("viewProfile", viewProfile);
+        model.addAttribute("profileEditAction", profileEditFormResolver.resolveAction(viewProfile));
+        model.addAttribute("profileEditPageKey", profileEditFormResolver.resolvePageKey());
         return "web/profile-edit";
     }
 
@@ -269,6 +276,7 @@ public class WebPageController {
         @RequestParam(name = "name", required = false) String name,
         @RequestParam(name = "phoneNumber", required = false) String phoneNumber,
         @RequestParam(name = "bio", required = false) String bio,
+        @RequestParam(name = "role", required = false) String role,
         RedirectAttributes redirectAttributes
     ) {
         if (!isAuthenticatedPrincipal(principalEmail)) {
@@ -276,7 +284,9 @@ public class WebPageController {
         }
 
         try {
-            userService.updateProfile(principalEmail, new UpdateProfileRequest(username, email, name, bio, phoneNumber));
+            UpdateProfileRequest request = new UpdateProfileRequest(username, email, name, bio, phoneNumber);
+            request.setRole(role);
+            userService.updateProfile(principalEmail, request);
             redirectAttributes.addFlashAttribute("notice", "Profile updated.");
         } catch (RuntimeException ex) {
             redirectAttributes.addFlashAttribute("error", ex.getMessage());
@@ -910,7 +920,10 @@ public class WebPageController {
 
     private String profileImageUrl(UserProfileResponse profile) {
         if (profile.getProfilePictureId() != null) {
-            return "/files/" + profile.getProfilePictureId();
+            String resolved = profileImageUrlResolver.resolve(profile.getProfilePictureId());
+            if (resolved != null && !resolved.isBlank()) {
+                return resolved;
+            }
         }
         return placeholderImageUrl(displayName(profile));
     }

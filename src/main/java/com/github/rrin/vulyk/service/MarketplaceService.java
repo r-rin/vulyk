@@ -25,7 +25,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import com.github.rrin.vulyk.service.marketplace.MarketplaceBrowseCriteria;
-import com.github.rrin.vulyk.service.marketplace.MarketplaceBrowseQueryService;
+import com.github.rrin.vulyk.service.marketplace.api.MarketplaceBrowseQueryService;
 
 @Service
 @RequiredArgsConstructor

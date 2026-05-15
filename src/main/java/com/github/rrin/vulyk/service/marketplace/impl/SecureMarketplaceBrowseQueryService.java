@@ -1,8 +1,10 @@
-package com.github.rrin.vulyk.service.marketplace;
+package com.github.rrin.vulyk.service.marketplace.impl;
 
 import com.github.rrin.vulyk.domain.entity.marketplace.MarketplaceItemEntity;
 import com.github.rrin.vulyk.domain.entity.marketplace.MarketplaceItemStatus;
 import com.github.rrin.vulyk.repository.MarketplaceItemRepository;
+import com.github.rrin.vulyk.service.marketplace.MarketplaceBrowseCriteria;
+import com.github.rrin.vulyk.service.marketplace.api.MarketplaceBrowseQueryService;
 import jakarta.persistence.criteria.Predicate;
 import java.util.ArrayList;
 import java.util.List;

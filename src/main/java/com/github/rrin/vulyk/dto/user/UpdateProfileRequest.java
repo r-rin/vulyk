@@ -28,4 +28,15 @@ public class UpdateProfileRequest {
 
     @Size(max = 15)
     private String phoneNumber;
+
+    @Size(max = 16)
+    private String role;
+
+    public UpdateProfileRequest(String username, String email, String name, String bio, String phoneNumber) {
+        this.username = username;
+        this.email = email;
+        this.name = name;
+        this.bio = bio;
+        this.phoneNumber = phoneNumber;
+    }
 }

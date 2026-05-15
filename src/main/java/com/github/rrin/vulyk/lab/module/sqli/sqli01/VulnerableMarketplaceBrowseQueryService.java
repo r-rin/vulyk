@@ -1,11 +1,11 @@
-package com.github.rrin.vulyk.lab.module.sqli;
+package com.github.rrin.vulyk.lab.module.sqli.sqli01;
 
 import com.github.rrin.vulyk.domain.entity.marketplace.MarketplaceItemEntity;
 import com.github.rrin.vulyk.domain.entity.marketplace.MarketplaceItemStatus;
 import com.github.rrin.vulyk.lab.config.ConditionalOnLabEnabled;
 import com.github.rrin.vulyk.repository.MarketplaceItemRepository;
 import com.github.rrin.vulyk.service.marketplace.MarketplaceBrowseCriteria;
-import com.github.rrin.vulyk.service.marketplace.MarketplaceBrowseQueryService;
+import com.github.rrin.vulyk.service.marketplace.api.MarketplaceBrowseQueryService;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import java.util.List;
